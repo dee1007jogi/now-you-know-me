@@ -63,10 +63,15 @@ const Game = mongoose.model("Game", gameSchema);
 let memoryState = { status: "lobby", sessionCode: "123456" };
 
 async function getGameState() {
-    if (!MONGO_URI) return memoryState;
-    let g = await Game.findOne();
-    if (!g) g = await Game.create({});
-    return g;
+    try {
+        if (!MONGO_URI) return memoryState;
+        let g = await Game.findOne();
+        if (!g) g = await Game.create({});
+        return g;
+    } catch (e) {
+        console.error("⚠️ Error fetching Game State, using memory fallback.");
+        return memoryState;
+    }
 }
 
 // ---- File upload setup (Memory Storage for Base64) ----
@@ -394,18 +399,32 @@ app.get("/api/admin/export", async (req, res) => {
 
 // ---- Socket.IO ----
 io.on("connection", async (socket) => {
-    const g = await getGameState();
-    const leaderboard = await getLeaderboard();
-    const playersCount = await Player.countDocuments();
-    const readyCount = await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } });
+    console.log("🔌 New socket connection");
+    try {
+        const g = await getGameState();
+        const leaderboard = await getLeaderboard().catch(() => []);
+        
+        const playersCount = MONGO_URI && mongoose.connection.readyState === 1 ? await Player.countDocuments().catch(() => 0) : 0;
+        const readyCount = MONGO_URI && mongoose.connection.readyState === 1 ? await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }).catch(() => 0) : 0;
 
-    socket.emit("state", {
-        status: g.status,
-        playersCount,
-        readyCount,
-        cardsCount: readyCount,
-        leaderboard
-    });
+        socket.emit("state", {
+            status: g.status,
+            playersCount,
+            readyCount,
+            cardsCount: readyCount,
+            leaderboard
+        });
+    } catch (err) {
+        console.error("🔌 Socket Connection Error Handled:", err);
+    }
+});
+
+// 🛡️ GLOBAL PROCESS SHIELD
+process.on('uncaughtException', (err) => {
+    console.error('💥 UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 UNHANDLED REJECTION:', reason);
 });
 
 // ---- Start ----
