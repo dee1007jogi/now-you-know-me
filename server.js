@@ -132,23 +132,32 @@ app.get("/tv", (req, res) => res.sendFile(path.join(__dirname, "public", "tv.htm
 
 // ---- API: Join ----
 app.post("/api/join", async (req, res) => {
-    const g = await getGameState();
-    if (g.status !== "lobby")
-        return res.status(400).json({ error: "Game already started" });
+    console.log("📩 Join request received:", req.body);
+    try {
+        const g = await getGameState();
+        if (g.status !== "lobby")
+            return res.status(400).json({ error: "Game already started" });
 
-    const name = String(req.body.name || "").trim();
-    if (!name) return res.status(400).json({ error: "Name required" });
+        const name = String(req.body.name || "").trim();
+        if (!name) return res.status(400).json({ error: "Name required" });
 
-    const id = nanoid(8);
-    const newPlayer = { id, name };
-    
-    if (MONGO_URI) {
-        await Player.create(newPlayer);
+        const id = nanoid(8);
+        const newPlayer = { id, name };
+        
+        if (MONGO_URI) {
+            console.log("💾 Creating player in MongoDB...");
+            await Player.create(newPlayer);
+        } else {
+            console.log("📝 Running in memory mode, skipping DB save.");
+        }
+        
+        await emitState();
+        console.log("✅ Player joined successfully:", id);
+        res.json({ playerId: id });
+    } catch (err) {
+        console.error("❌ JOIN ERROR:", err);
+        res.status(500).json({ error: "Server error during join. Check DB connection." });
     }
-    // Note: in-memory fallback not fully implemented for joins for brevity
-    
-    emitState();
-    res.json({ playerId: id });
 });
 
 // ---- API: Upload photo (Stored as Base64) ----
