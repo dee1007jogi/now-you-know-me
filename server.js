@@ -21,11 +21,16 @@ app.use(express.static(path.join(__dirname, "public")));
 const MONGO_URI = process.env.MONGO_URI;
 if (MONGO_URI) {
     mongoose.connect(MONGO_URI, {
-        serverSelectionTimeoutMS: 5000 // Stop waiting after 5s if DB is down
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 10000,
     })
         .then(() => console.log("✅ Connected to MongoDB"))
-        .catch(err => console.error("❌ MongoDB Connection Error:", err));
-} else {
+        .catch(err => console.error("❌ MongoDB Connection Error. Did you allow IP 0.0.0.0/0 in Atlas?", err));
+    
+    // 🚀 CRITICAL: Disable buffering so requests don't hang if DB is slow
+    mongoose.set('bufferCommands', false);
+}
+ else {
     console.warn("⚠️  MONGO_URI not found. Running with in-memory fallback (state will NOT persist).");
 }
 
@@ -152,15 +157,16 @@ app.post("/api/join", async (req, res) => {
         const id = nanoid(8);
         const newPlayer = { id, name };
         
-        if (MONGO_URI) {
+        if (MONGO_URI && mongoose.connection.readyState === 1) {
             console.log("💾 Creating player in MongoDB...");
             await Player.create(newPlayer);
         } else {
-            console.log("📝 Running in memory mode, skipping DB save.");
+            console.log("⚠️ DB not ready. Saving to memory fallback for now.");
+            // We can still let them join to keep the game moving
         }
         
-        // 🚀 FAST RESPONSE: Tell the client they are in FIRST
-        res.json({ playerId: id });
+        // 🚀 FAST RESPONSE
+        return res.json({ playerId: id });
 
         // 🔄 BACKGROUND: Update everyone else without making the joiner wait
         emitState().catch(e => console.error("Background emit error:", e));
