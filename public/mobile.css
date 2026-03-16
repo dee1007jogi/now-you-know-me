@@ -259,8 +259,26 @@
     }
 
     .bestiary-case {
-        width: 80vw !important;
+        width: 85vw !important;
         /* One card at a time on screen */
+        margin: 0 auto !important;
+    }
+
+    .bestiary-content {
+        padding: 0.8rem !important;
+    }
+
+    .bestiary-footer {
+        max-height: 180px !important;
+        overflow-y: auto !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 5px !important;
+    }
+
+    .bestiary-detail {
+        min-height: 45px !important;
+        padding: 4px !important;
     }
 
     .bestiary-title {
@@ -281,8 +299,19 @@
         font-size: 1.5rem !important;
     }
 
+    #matchInstructions {
+        top: 80px !important;
+        left: 20px !important;
+        text-align: center !important;
+        width: calc(100% - 40px) !important;
+    }
+
     #matchInstructions h1 {
-        font-size: 1.6rem !important;
+        font-size: 1.4rem !important;
+    }
+
+    #matchInstructions p {
+        font-size: 0.8rem !important;
     }
 
     /* Confirm Modal */

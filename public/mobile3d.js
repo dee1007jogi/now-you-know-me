@@ -116,7 +116,7 @@ window.Mobile3D = {
             cols: mobile ? 2 : 3,
             spacingX: mobile ? 12 : 10,
             spacingY: mobile ? 10 : 9,
-            startY: mobile ? 8 : 4,
+            startY: mobile ? 6 : 4, // Lower start for mobile to avoid card overlap
             startZ: mobile ? 0 : 0
         };
     },

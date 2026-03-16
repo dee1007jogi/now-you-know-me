@@ -822,6 +822,37 @@ function updateSliderView() {
     document.getElementById("nextCardBtn").style.opacity = currentSliderIndex >= cards.length - 1 ? "0.3" : "1";
 }
 
+// Touch Gestures for Slider
+let touchStartX = 0;
+let touchEndX = 0;
+const sliderContainer = document.getElementById("cardFocusContainer");
+if (sliderContainer) {
+    sliderContainer.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    sliderContainer.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, false);
+}
+
+function handleSwipe() {
+    if (touchEndX < touchStartX - 50) { // Swipe Left -> Next
+        const cards = document.querySelectorAll(".bestiary-case");
+        if (currentSliderIndex < cards.length - 1) {
+            currentSliderIndex++;
+            updateSliderView();
+        }
+    }
+    if (touchEndX > touchStartX + 50) { // Swipe Right -> Prev
+        if (currentSliderIndex > 0) {
+            currentSliderIndex--;
+            updateSliderView();
+        }
+    }
+}
+
 document.getElementById("prevCardBtn").onclick = () => {
     if (currentSliderIndex > 0) {
         currentSliderIndex--;
@@ -966,7 +997,9 @@ async function loadPeopleGrid(cardIdx = 1) {
     const spacingY = gridConfig.spacingY;
 
     // Shift Grid for best framing with the 3DS slider
-    const groupOffsetX = window.innerWidth <= 768 ? -10 : -48;
+    const isMobile = window.innerWidth <= 768;
+    const groupOffsetX = isMobile ? -5 : -48; // Shifted right for better mobile view
+    const groupOffsetY = isMobile ? -5 : 0; // Shifted down for mobile to keep top clear
 
     // Shared Geometry for absolute uniformity
     const sphereGeo = new THREE.SphereGeometry(3.0, 32, 32);
