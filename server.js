@@ -112,22 +112,34 @@ async function getLeaderboard() {
 }
 
 async function emitState() {
-    const g = await getGameState();
-    
-    // 🚀 OPTIMIZATION: Use countDocuments instead of fetching all players into RAM
-    const playersCount = MONGO_URI ? await Player.countDocuments() : 0;
-    const readyCount = MONGO_URI ? await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }) : 0;
-    const cardsCount = MONGO_URI ? await Player.countDocuments({ answers: { $exists: true } }) : 0;
-    
-    const leaderboard = await getLeaderboard();
-    
-    io.emit("state", {
-        status: g.status,
-        playersCount,
-        readyCount,
-        cardsCount,
-        leaderboard
-    });
+    try {
+        const g = await getGameState();
+        
+        let playersCount = 0;
+        let readyCount = 0;
+        let cardsCount = 0;
+        let leaderboard = [];
+
+        // 🚀 ULTRA-SAFE: Only talk to DB if readyState is 1 (Connected)
+        if (MONGO_URI && mongoose.connection.readyState === 1) {
+            playersCount = await Player.countDocuments().catch(() => 0);
+            readyCount = await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }).catch(() => 0);
+            cardsCount = await Player.countDocuments({ answers: { $exists: true } }).catch(() => 0);
+            leaderboard = await getLeaderboard().catch(() => []);
+        } else {
+            console.log("📡 Skipping DB counts in emitState (DB not ready)");
+        }
+        
+        io.emit("state", {
+            status: g.status,
+            playersCount,
+            readyCount,
+            cardsCount,
+            leaderboard
+        });
+    } catch (err) {
+        console.error("❌ emitState Error:", err);
+    }
 }
 
 function buildClues(answers) {
