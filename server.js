@@ -168,30 +168,33 @@ app.post("/api/join", async (req, res) => {
         if (g.status !== "lobby")
             return res.status(400).json({ error: "Game already started" });
 
-        const name = String(req.body.name || "").trim();
-        if (!name) return res.status(400).json({ error: "Name required" });
-
         const id = nanoid(8);
         const newPlayer = { id, name };
         
-        if (MONGO_URI && mongoose.connection.readyState === 1) {
-            console.log("💾 Creating player in MongoDB...");
-            await Player.create(newPlayer);
-        } else {
-            console.log("⚠️ DB not ready. Saving to memory fallback for now.");
-            // We can still let them join to keep the game moving
-        }
-        
-        // 🚀 FAST RESPONSE
-        return res.json({ playerId: id });
+        // 🚀 INSTANT RESPONSE: Tell the client they are in before doing heavy DB work
+        res.json({ playerId: id });
 
-        // 🔄 BACKGROUND: Update everyone else without making the joiner wait
-        emitState().catch(e => console.error("Background emit error:", e));
+        // 🔄 BACKGROUND TASK: Save to DB in the background
+        setImmediate(async () => {
+            try {
+                if (MONGO_URI && mongoose.connection.readyState === 1) {
+                    console.log("💾 [Background] Saving player:", name);
+                    await Player.create(newPlayer);
+                } else {
+                    console.log("📝 [Background] DB not ready, skipping save.");
+                }
+                emitState().catch(e => console.error("Emit error:", e));
+            } catch (err) {
+                console.error("❌ Background Save Error:", err);
+            }
+        });
         
-        console.log("✅ Player joined successfully:", id);
     } catch (err) {
-        console.error("❌ JOIN ERROR:", err);
-        res.status(500).json({ error: "Server error during join. Check DB connection." });
+        console.error("❌ CRITICAL JOIN ERROR:", err);
+        // If we haven't sent a response yet, send a 500
+        if (!res.headersSent) {
+            res.status(500).json({ error: "System failure. Try again." });
+        }
     }
 });
 

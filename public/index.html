@@ -1033,9 +1033,14 @@
                     body: JSON.stringify({ name })
                 });
 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Join failed");
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("Server Error:", res.status, text);
+                    throw new Error(`Server Error (${res.status}). Try again!`);
+                }
 
+                const data = await res.json();
+                
                 // Save playerId for other pages
                 localStorage.setItem("playerId", data.playerId);
                 localStorage.setItem("playerName", name);
@@ -1043,7 +1048,8 @@
                 // 1. Fade out login panel
                 gsap.to(".login-panel", {
                     opacity: 0, y: -20, duration: 0.5, onComplete: () => {
-                        document.querySelector(".login-panel").style.display = "none";
+                        const panel = document.querySelector(".login-panel");
+                        if(panel) panel.style.display = "none";
                     }
                 });
 
@@ -1051,11 +1057,11 @@
                 startSelfiePhase(window._mascots);
 
             } catch (err) {
-                console.error(err);
+                console.error("Fetch Error:", err);
                 btn.innerHTML = originalText;
                 btn.style.pointerEvents = "auto";
                 msg.className = "msg error animate-pop";
-                msg.textContent = err.message;
+                msg.textContent = err.message || "Connection lost. Please refresh.";
             }
         };
 
