@@ -20,7 +20,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // ---- MongoDB Connection ----
 const MONGO_URI = process.env.MONGO_URI;
 if (MONGO_URI) {
-    mongoose.connect(MONGO_URI)
+    mongoose.connect(MONGO_URI, {
+        serverSelectionTimeoutMS: 5000 // Stop waiting after 5s if DB is down
+    })
         .then(() => console.log("✅ Connected to MongoDB"))
         .catch(err => console.error("❌ MongoDB Connection Error:", err));
 } else {
@@ -151,9 +153,13 @@ app.post("/api/join", async (req, res) => {
             console.log("📝 Running in memory mode, skipping DB save.");
         }
         
-        await emitState();
-        console.log("✅ Player joined successfully:", id);
+        // 🚀 FAST RESPONSE: Tell the client they are in FIRST
         res.json({ playerId: id });
+
+        // 🔄 BACKGROUND: Update everyone else without making the joiner wait
+        emitState().catch(e => console.error("Background emit error:", e));
+        
+        console.log("✅ Player joined successfully:", id);
     } catch (err) {
         console.error("❌ JOIN ERROR:", err);
         res.status(500).json({ error: "Server error during join. Check DB connection." });
