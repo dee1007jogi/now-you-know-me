@@ -168,6 +168,9 @@ app.post("/api/join", async (req, res) => {
         if (g.status !== "lobby")
             return res.status(400).json({ error: "Game already started" });
 
+        const name = String(req.body.name || "").trim();
+        if (!name) return res.status(400).json({ error: "Name required" });
+
         const id = nanoid(8);
         const newPlayer = { id, name };
         

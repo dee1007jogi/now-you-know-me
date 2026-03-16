@@ -243,9 +243,9 @@
     <script src="https://cdn.jsdelivr.net/npm/cannon@0.18.0/build/cannon.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
-    <script src="/mobile3d.js"></script>
-    <script src="/engine3d.js"></script>
-    <script src="/lipsync.js"></script>
+    <script src="/mobile3d.js?v=2"></script>
+    <script src="/engine3d.js?v=2"></script>
+    <script src="/lipsync.js?v=2"></script>
 
     <!-- CINEMATIC DIALOGUE – speech bubble above character head -->
     <div id="speechBubble" style="
@@ -1034,12 +1034,20 @@
                 });
 
                 if (!res.ok) {
-                    const text = await res.text();
+                    const text = await res.text().catch(() => "Unknown error");
                     console.error("Server Error:", res.status, text);
-                    throw new Error(`Server Error (${res.status}). Try again!`);
+                    throw new Error(`Server Error (${res.status}). Please check Render logs.`);
                 }
 
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    console.error("JSON Parse Error:", jsonErr);
+                    throw new Error("Invalid response from server. Please refresh.");
+                }
+                
+                if (!data || !data.playerId) throw new Error("Join failed: No Player ID returned.");
                 
                 // Save playerId for other pages
                 localStorage.setItem("playerId", data.playerId);
