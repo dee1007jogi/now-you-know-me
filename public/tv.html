@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Global Leaderboard – Now You Know Me</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/mobile.css">
+    <style>
+        :root {
+            --navy-deep: #020617;
+            --gold: #fbbf24;
+            --cyan: #22d3ee;
+            --glass: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--navy-deep);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #webgl-container {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* UI STRATA */
+        .tv-ui {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            padding: 40px 60px;
+        }
+
+        /* HEADER */
+        .tv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .title-group {
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 40px;
+        }
+
+        .tv-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+        }
+
+        .tv-subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--gold);
+            letter-spacing: 4px;
+            margin-top: -5px;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .meta-group {
+            display: flex;
+            gap: 30px;
+        }
+
+        .meta-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 15px 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        .meta-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        /* LOGO */
+        .tv-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Outfit';
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: #000;
+        }
+
+        /* FOOTER */
+        .tv-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .live-pulse {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .live-text {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            color: var(--cyan);
+        }
+
+        .call-to-action {
+            font-family: 'Outfit';
+            font-weight: 900;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            opacity: 0.8;
+        }
+
+        /* MASCOT OVERLAYS (GLASS) */
+        .mascot-glass {
+            position: absolute;
+            bottom: 40px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 20px 30px;
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            animation: float-ui 4s ease-in-out infinite;
+        }
+
+        @keyframes float-ui {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .left-mascot {
+            left: 60px;
+        }
+
+        .right-mascot {
+            right: 60px;
+        }
+
+        .mascot-info h4 {
+            font-family: 'Outfit';
+            font-weight: 900;
+            font-size: 1rem;
+            color: var(--gold);
+        }
+
+        .mascot-info p {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="webgl-container"></div>
+
+    <div class="tv-ui">
+        <!-- HEADER -->
+        <header class="tv-header">
+            <div class="tv-logo">
+                <div class="logo-box"><span class="logo-text">N</span></div>
+                <div class="logo-name"
+                    style="font-family:'Outfit'; font-weight:900; font-size:1.5rem; letter-spacing:-1px;">
+                    NOW<span>YOU</span>KNOW</div>
+            </div>
+
+            <div class="title-group">
+                <h1 class="tv-title">TEAM LEADERS</h1>
+                <p class="tv-subtitle">MISSION: DISCOVERY</p>
+            </div>
+
+            <div class="meta-group">
+                <div class="meta-item">
+                    <span class="meta-label">Mission Code</span>
+                    <span class="meta-value" id="displayCode">------</span>
+                </div>
+                <div id="timerGroup" class="meta-item hidden">
+                    <span class="meta-label">Time Remaining</span>
+                    <span class="meta-value" id="timer">--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- FOOTER -->
+        <footer class="tv-footer">
+            <div class="left-mascot mascot-glass">
+                <div style="font-size:3rem;">🐰</div>
+                <div class="mascot-info">
+                    <h4>Bunny Analyst</h4>
+                    <p>Scanning for perfect matches...</p>
+                </div>
+            </div>
+
+            <div class="center-footer"
+                style="text-align:center; position:absolute; left:50%; transform:translateX(-50%); bottom:40px;">
+                <div class="live-pulse">
+                    <div class="pulse-dot"></div>
+                    <span class="live-text"><span id="participantCount">0</span> DETECTIVES LIVE</span>
+                </div>
+                <p class="call-to-action" style="margin-top:10px;">Mingle & Find Your Clues! 🤝</p>
+            </div>
+
+            <div class="right-mascot mascot-glass">
+                <div class="mascot-info" style="text-align:right;">
+                    <h4>Playful Fox</h4>
+                    <p>The leaderboard is heating up!</p>
+                </div>
+                <div style="font-size:3rem;">🦊</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/mobile3d.js"></script>
+    <script src="/engine3d.js"></script>
+    <script src="/tv.js"></script>
+
+</body>
+
+</html>

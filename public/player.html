@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/mobile.css">
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --neon-blue: #38bdf8;
+        --neon-purple: #c084fc;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Spartan:wght@200;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;1,300&display=swap');
+
+    @font-face {
+        font-family: "thewitcher";
+        src: url("https://aditibuket.s3.ap-south-1.amazonaws.com/Thewitcher-jnOj.ttf") format("truetype");
+    }
+
+    body {
+        background: #020617;
+        color: white;
+        overflow-x: hidden;
+        margin: 0;
+        font-family: 'Outfit', 'Inter', sans-serif;
+    }
+
+    #webgl-container {
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* Progress Meter - Glass Tube */
+    .glass-meter-container {
+        position: fixed;
+        top: 30px;
+        left: 32.5%;
+        /* Aligned above the shifted board */
+        transform: translateX(-50%);
+        width: 240px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--glass-border);
+        border-radius: 40px;
+        backdrop-filter: blur(20px);
+        z-index: 1000;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        padding: 0 5px;
+        animation: pulse-glow 3s infinite ease-in-out;
+    }
+
+    .meter-fill {
+        height: 35px;
+        width: 10%;
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+        border-radius: 35px;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+    }
+
+    .meter-fill::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(transparent, rgba(255, 255, 255, 0.3), transparent);
+        border-radius: inherit;
+    }
+
+    /* Clue Book Overlay */
+    .clue-book-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        pointer-events: none;
+        padding-top: 140px;
+        /* Precise alignment with 3D Book center */
+    }
+
+    .book-content {
+        width: 100%;
+        max-width: 680px;
+        /* Spans both 3D pages */
+        background: transparent;
+        border: none;
+        padding: 0;
+        pointer-events: auto;
+    }
+
+    .q-title {
+        display: none;
+    }
+
+    .option-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* Left Page | Right Page */
+        grid-auto-flow: column;
+        /* Distribute 1,2 on Left and 3,4 on Right */
+        gap: 15px 90px;
+        /* 90px gap for the 3D Book Spine */
+        perspective: 1000px;
+        transform: rotateX(32deg);
+        /* Tilt to match the conference table angle */
+        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+
+    .option-orb {
+        background: rgba(255, 255, 240, 0.1);
+        /* Subtle papery parchment tint */
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #1e293b;
+        /* "Ink" Color */
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        backdrop-filter: blur(1px);
+    }
+
+    .option-orb.selected {
+        background: #38bdf8;
+        color: white;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .option-icon {
+        font-size: 1.1rem;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Surprising Skill Input */
+    .glow-input-container {
+        margin-top: 20px;
+        position: relative;
+    }
+
+    .glow-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 20px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .glow-input:focus {
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn-pixar {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        border-radius: 20px;
+        font-size: 1.3rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        margin-top: 30px;
+        width: 100%;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-pixar:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(16, 185, 129, 0.4);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Scoped Player Animations */
+    .animate-pop {
+        animation: pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes pop-in {
+        0% {
+            opacity: 0;
+            transform: scale(0.8) translateY(30px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Score Pill - Top Right */
+    .score-pill {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid var(--glass-border);
+        border-radius: 30px;
+        padding: 10px 25px;
+        backdrop-filter: blur(20px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        animation: score-float 4s infinite ease-in-out;
+    }
+
+    .pill-value {
+        font-size: 1.4rem;
+        font-weight: 950;
+        background: linear-gradient(135deg, #fb923c, #facc15);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .glass-text {
+        background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Safe Dial Modal */
+    .safe-dial-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 30px;
+    }
+
+    .safe-dial-outer {
+        position: absolute;
+        inset: 0;
+        border: 8px solid #facc15;
+        border-radius: 50%;
+        box-shadow: 0 0 40px rgba(250, 204, 21, 0.3);
+        animation: dial-spin 10s linear infinite;
+    }
+
+    .safe-dial-inner {
+        position: absolute;
+        inset: 20px;
+        background: radial-gradient(circle at center, #334155, #0f172a);
+        border: 4px solid #94a3b8;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    @keyframes dial-spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes score-float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes rotate-hat {
+        0% {
+            transform: rotateY(0deg);
+        }
+
+        100% {
+            transform: rotateY(360deg);
+        }
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        50% {
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+        }
+    }
+
+    /* Bestiary Mystery Card Container (The Witcher Style) */
+    .bestiary-row {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        padding: 20px;
+        perspective: 2000px;
+    }
+
+    .bestiary-case {
+        position: relative;
+        width: 320px;
+        /* Slimmer for row */
+        background-color: rgb(32, 31, 30);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        outline: 4px solid #444;
+        outline-offset: 2px;
+        font-family: 'Spartan', sans-serif;
+        color: #e0dede;
+        overflow: hidden;
+        pointer-events: auto;
+        cursor: pointer;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .bestiary-case:hover {
+        transform: translateY(-20px) scale(1.05);
+        outline-color: #facc15;
+    }
+
+    .bestiary-case.active {
+        outline-color: #38bdf8;
+        box-shadow: 0 0 50px rgba(56, 189, 248, 0.4);
+        transform: translateY(-30px) scale(1.1);
+        z-index: 10;
+    }
+
+    .bestiary-case::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("https://github.com/aditee08/repo/blob/main/pngegg%20(1).png?raw=true") no-repeat center;
+        opacity: 0.1;
+        pointer-events: none;
+    }
+
+    .bestiary-title {
+        font-family: "thewitcher", serif;
+        font-size: 1.6rem;
+        padding: 0.5em 0;
+        text-align: center;
+        color: rgb(206, 202, 202);
+        letter-spacing: 2px;
+        background: #111;
+        border-bottom: 2px solid #444;
+    }
+
+    .bestiary-figure {
+        width: 100%;
+        height: 180px;
+        background: radial-gradient(closest-side, #2d694f, #1d5248);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .bestiary-figure img {
+        max-height: 100%;
+        filter: brightness(1.1) contrast(1.1);
+        transform: scale(1.1);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .bestiary-case:hover .bestiary-figure img,
+    .bestiary-case.active .bestiary-figure img {
+        transform: scale(1.15) translateY(-15px);
+    }
+
+    .bestiary-content {
+        padding: 1em;
+        text-align: left;
+    }
+
+    .bestiary-content h3 {
+        font-family: "thewitcher", serif;
+        font-size: 1.4rem;
+        margin-top: 0;
+        color: #facc15;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .bestiary-description {
+        font-family: 'Oswald', sans-serif;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: #cacaca;
+        margin-bottom: 0.5em;
+        height: 60px;
+        overflow: hidden;
+    }
+
+    .bestiary-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+        padding: 0 0.8em 1em 0.8em;
+    }
+
+    .bestiary-detail {
+        flex: 1;
+        background: #302f30;
+        border: 1px solid #403d3d;
+        padding: 0.4em;
+        border-radius: 2px;
+        min-height: 60px;
+    }
+
+    .bestiary-detail h6 {
+        font-size: 0.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #888;
+        margin: 0 0 3px 0;
+        letter-spacing: 1px;
+    }
+
+    .bestiary-detail p {
+        font-family: 'Oswald', sans-serif;
+        font-size: 0.75rem;
+        color: #fff;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .fade-anim {
+        animation: fadeEffect 0.8s ease-in-out;
+    }
+
+    .card-shimmer {
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 250, 230, 0.1), transparent);
+        transform: skewX(-20deg);
+        transition: 0.5s;
+    }
+
+    .bestiary-case:hover .card-shimmer,
+    .bestiary-case.active .card-shimmer {
+        left: 150%;
+        transition: 0.8s;
+    }
+
+    .bestiary-figure {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Card Slider Navigation */
+    .slider-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--glass-border);
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .slider-nav-btn:hover {
+        background: var(--neon-blue);
+        border-color: #fff;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        transform: translateY(-50%) scale(1.15);
+    }
+
+    .slider-nav-btn.prev {
+        left: 40px;
+    }
+
+    .slider-nav-btn.next {
+        right: 40px;
+    }
+
+    .bestiary-viewport {
+        width: 100vw;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .bestiary-row {
+        display: flex;
+        gap: 30px;
+        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+</style>
+</head>
+
+<body>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/mobile3d.js"></script>
+    <script src="/engine3d.js"></script>
+
+    <!-- 3D Background Container -->
+    <div id="webgl-container" style="position:fixed; inset:0; z-index:1; pointer-events:none;"></div>
+
+    <!-- HEADER / PROGRESS METER -->
+    <div id="setupHeader" class="hidden">
+        <div class="glass-meter-container">
+            <div id="progressBar" class="meter-fill" style="width: 5%;"></div>
+        </div>
+        <div class="progress-text-container" style="position:fixed; top:85px; left:32.5%; transform:translateX(-50%); z-index:1000; text-align:center;">
+            <p id="progressText"
+                style="font-weight:900; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:2px; font-size:0.8rem;">
+                Step 1 / 7</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="mainUI" style="position:relative; z-index:100; min-height:100vh;">
+
+        <!-- GLOBAL SCORE PILL -->
+        <div id="scorePill" class="score-pill hidden">
+            <span style="font-weight:800; opacity:0.6; text-transform:uppercase; font-size:0.7rem;">Your Score</span>
+            <span id="pillValue" class="pill-value">0</span>
+        </div>
+
+        <!-- ========== PHOTO CAPTURE (Wait for Admin or Initial) ========== -->
+        <div id="photoStage" class="clue-book-overlay hidden">
+            <div class="book-content animate-pop" style="max-width:380px;">
+                <h1 class="q-title" style="font-size:1.8rem;">Give your best smile!</h1>
+                <p style="text-align:center; color:rgba(255,255,255,0.7); margin-bottom:30px;">This appears in the
+                    matching grid for your team.</p>
+                <div style="text-align:center;">
+                    <input id="photoInput" type="file" accept="image/*" capture="user" class="hidden" />
+                    <button id="cameraBtn" class="btn-pixar" style="background:var(--neon-blue); margin-top:0;">📸 Take
+                        Photo</button>
+                    <div id="previewWrap" class="hidden"
+                        style="margin-top:20px; border-radius:20px; overflow:hidden; border:4px solid var(--neon-blue);">
+                        <img id="preview" style="width:100%; display:block;" />
+                    </div>
+                </div>
+                <button id="uploadBtn" class="btn-pixar hidden">Save & Continue</button>
+                <p id="photoMsg" style="text-align:center; margin-top:15px; font-size:0.9rem;"></p>
+            </div>
+        </div>
+
+        <!-- ========== QUESTIONNAIRE (Pixar Clue Book Style) ========== -->
+        <div id="questionsStage" class="clue-book-overlay hidden">
+            <div id="qCard" class="book-content animate-pop">
+                <!-- 2D UI hidden to match 3D Conference Board interaction -->
+                <h2 id="questionText" class="hidden"></h2>
+                <div id="optionsGrid" class="hidden"></div>
+
+                <div id="textInputWrap" class="glow-input-container hidden">
+                    <input id="surprisingSkill" class="glow-input" type="text"
+                        placeholder="e.g. chess, baking, beat-boxing…" />
+                    <button id="submitAnswersBtn" class="btn-pixar">Submit to Mystery! ✨</button>
+                </div>
+
+                <p id="answersMsg" style="text-align:center; padding-top:20px; font-weight:800;"></p>
+            </div>
+        </div>
+
+        <!-- ========== WAITING SCREEN ========== -->
+        <div id="waitingStage" class="clue-book-overlay hidden">
+            <div class="book-content animate-pop" style="text-align:center; max-width:400px;">
+                <!-- Rotating Detective Hat -->
+                <div class="detective-hat-container">
+                    <div class="rotating-hat">🕵️</div>
+                </div>
+                <h1 class="q-title">You're All Set!</h1>
+                <p style="color:rgba(255,255,255,0.7); font-size:1.1rem; line-height:1.6;">Waiting for the host to start
+                    the game...<br /><br />
+                    <span style="color:var(--neon-blue);">💬 Tip: Mingle and chat! Remember faces!</span>
+                </p>
+                <div style="margin-top:40px; transform:scale(0.8);">
+                    <div class="meter-fill" style="width:100%; animation: pulse-glow 2s infinite;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== LIVE MATCH STAGE (Full 3D Interaction) ========== -->
+        <div id="liveStage" class="hidden">
+            <!-- Scanning Overlay -->
+            <div id="scanOverlay"
+                style="position:fixed; inset:0; pointer-events:none; background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, transparent 70%); opacity:0; z-index:50;">
+            </div>
+
+            <!-- Bestiary Slider Section -->
+            <div id="cardFocusContainer"
+                style="position:fixed; top:5%; left:0; right:0; z-index:100; pointer-events:auto;">
+                <button id="prevCardBtn" class="slider-nav-btn prev">‹</button>
+                <div class="bestiary-viewport">
+                    <div id="bestiaryRow" class="bestiary-row">
+                        <!-- Clue Cards will be injected here -->
+                    </div>
+                </div>
+                <button id="nextCardBtn" class="slider-nav-btn next">›</button>
+            </div>
+
+            <!-- Instructions Overlay -->
+            <div id="matchInstructions" style="position:fixed; top:40px; left:40px; z-index:200; pointer-events:none;">
+                <h1
+                    style="font-size:2.5rem; font-weight:950; margin-bottom:5px; text-shadow:0 0 20px rgba(56,189,248,0.5);">
+                    Match the Mystery!</h1>
+                <p style="color:rgba(255,255,255,0.6); font-weight:700;">Select a sphere that matches the clues.</p>
+            </div>
+
+            <!-- Cooldown Overlay -->
+            <div id="cooldownOverlay" class="hidden"
+                style="position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(10px); z-index:4000; display:flex; align-items:center; justify-content:center;">
+                <div style="text-align:center;">
+                    <div style="font-size:5rem; margin-bottom:20px;">❄️</div>
+                    <h2 style="font-size:2.5rem; color:#f87171;">COOLING DOWN...</h2>
+                    <p id="cooldownTimer" style="font-size:3rem; font-weight:950; color:white;">30s</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== GAME ENDED ========== -->
+    <div id="endedStage" class="clue-book-overlay hidden">
+        <div class="book-content animate-pop" style="text-align:center; max-width:420px;">
+            <div style="font-size:5rem; margin-bottom:20px;">🏆</div>
+            <h1 class="q-title">Game Over!</h1>
+            <h2 id="finalScore" style="color:#fb923c; font-size:2.5rem; font-weight:900; margin:20px 0;"></h2>
+            <p style="color:rgba(255,255,255,0.6); font-weight:600;">Check the big screen for the final winner!</p>
+            <button onclick="location.href='/'" class="btn-pixar"
+                style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); margin-top:40px; width:auto; padding:12px 30px;">Return
+                Home</button>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Confirm Match Modal (Golden Safe Style) -->
+    <div id="confirmModal" class="hidden"
+        style="position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px);">
+        <div class="book-content animate-pop"
+            style="max-width:480px; text-align:center; padding:40px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); border-radius:40px;">
+            <button id="modalArrowBack" onclick="closeModal()"
+                style="position:absolute; top:20px; left:20px; width:45px; height:45px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:50%; color:var(--neon-blue); font-size:1.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s; z-index:10;">
+                ‹
+            </button>
+            <div class="safe-dial-container">
+                <div class="safe-dial-outer"></div>
+                <div class="safe-dial-inner">
+                    <img id="modalPhoto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
+                </div>
+            </div>
+            <h3 id="modalName" style="font-size:2rem; font-weight:950; margin-bottom:5px; color:#fef08a;">Mystery
+                Detective</h3>
+            <p
+                style="margin-bottom:35px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">
+                Primary Suspect Identified?</p>
+            <div style="display:flex; gap:15px; justify-content: center;">
+                <button id="modalConfirm" class="btn-pixar"
+                    style="background:linear-gradient(135deg, #10b981, #059669); font-size:1.1rem; padding:15px 25px; margin-top:0; width: auto; white-space: nowrap;">CRACK
+                    THE CASE! ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pointsPopup"
+        style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:5rem; font-weight:900; color:#4ade80; opacity:0; pointer-events:none; z-index:10000; text-shadow:0 0 30px rgba(74,222,128,0.5);">
+        +10!</div>
+    <div id="confettiContainer" style="position:fixed; inset:0; pointer-events:none; z-index:9000;"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/player.js"></script>
+</body>
+
+</html>

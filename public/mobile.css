@@ -1,0 +1,549 @@
+/* 
+   ==========================================================================
+   NOW YOU KNOW ME - MASTER MOBILE OPTIMIZATION
+   ==========================================================================
+   This file centralizes all mobile-specific overrides (Width <= 768px).
+   Use the comments below to easily adjust font sizes, spacing, and layouts.
+*/
+
+@media (max-width: 768px) {
+
+    /* 
+       1. GLOBAL TYPOGRAPHY 
+       ----------------------------------------------------------------------
+       Optimizing all headings and body text for smaller screens.
+    */
+
+    h1 {
+        font-size: 2.2rem !important;
+        /* Scale down massive hero headings */
+        letter-spacing: -0.01em !important;
+        margin-bottom: 12px !important;
+    }
+
+    h2 {
+        font-size: 1.5rem !important;
+        /* Scale down sub-headings */
+        margin-bottom: 10px !important;
+    }
+
+    h3 {
+        font-size: 1.2rem !important;
+        /* Scale down card titles */
+        margin-bottom: 8px !important;
+        white-space: nowrap !important;
+        /* Force single line */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    p,
+    .text-secondary {
+        font-size: 0.9rem !important;
+        /* Smaller body text for readability */
+        line-height: 1.4 !important;
+    }
+
+    .text-xs {
+        font-size: 0.75rem !important;
+    }
+
+
+    /* 
+       2. GLOBAL BUTTONS & INPUTS 
+       ----------------------------------------------------------------------
+       Ensuring touch targets are comfortable and fit the screen width.
+    */
+
+    .btn {
+        padding: 14px 20px !important;
+        /* Slightly smaller padding for mobile */
+        font-size: 1.1rem !important;
+        /* Scale down button text */
+        margin-top: 15px !important;
+        border-radius: 16px !important;
+        /* Softer corners */
+    }
+
+    .btn-pixar {
+        padding: 12px 24px !important;
+        font-size: 1rem !important;
+        border-radius: 15px !important;
+    }
+
+    input[type="text"],
+    .glow-input {
+        padding: 12px 16px !important;
+        font-size: 1rem !important;
+        border-radius: 12px !important;
+    }
+
+    .skip-btn {
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
+        top: 15px !important;
+        right: 15px !important;
+    }
+
+
+    /* 
+       3. INDEX.HTML (Login/Lobby & Selfie)
+       ----------------------------------------------------------------------
+       Layout shifts and UI element repositioning for the join screen.
+    */
+
+    #joinScreen {
+        padding-left: 0 !important;
+        /* Center the panel on mobile */
+        justify-content: center !important;
+        align-items: flex-end !important;
+        /* Push toward bottom for thumb reach */
+        padding-bottom: 40px;
+    }
+
+    .login-panel {
+        width: 92% !important;
+        padding: 20px !important;
+        background: rgba(15, 23, 42, 0.9) !important;
+        /* Darker backdrop */
+        backdrop-filter: blur(15px) !important;
+    }
+
+    .logo-text-container div[style*="font-size: 3.5rem"] {
+        font-size: 1.8rem !important;
+        /* Scale "NOW YOU" */
+        margin-bottom: 5px;
+    }
+
+    .logo-text-container div[style*="font-size: 2.5rem"] {
+        font-size: 1.4rem !important;
+        /* Scale "KNOW ME" */
+    }
+
+    /* Selfie Booth Adjustments */
+    .selfie-frame-container {
+        width: 85vw !important;
+        height: 55vh !important;
+        border-radius: 30px !important;
+    }
+
+    .selfie-header h1 {
+        font-size: 1.8rem !important;
+        letter-spacing: -0.01em !important;
+        margin-bottom: 12px !important;
+    }
+
+    header {
+        flex-direction: row !important; 
+        justify-content: flex-end !important; /* Right align TV and Logout */
+        height: auto !important;
+        padding: 5px 15px !important;
+    }
+
+    header div[style*="display:flex; gap:20px"] {
+        display: none !important;
+        /* Hide TV mode and logout link to save space */
+    }
+
+    .selfie-header p {
+        font-size: 0.95rem !important;
+    }
+
+    .focus-bracket {
+        width: 20px !important;
+        height: 20px !important;
+        border-width: 3px !important;
+    }
+
+    .bracket-tl,
+    .bracket-tr {
+        top: 40px !important;
+    }
+
+    .bracket-bl,
+    .bracket-br {
+        bottom: 40px !important;
+    }
+
+    .heart-glow {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .capture-btn,
+    #shutterBtn {
+        width: 75px !important;
+        height: 75px !important;
+    }
+
+    .selfie-controls {
+        gap: 15px !important;
+        margin-top: 20px !important;
+    }
+
+    /* Speech Bubble Tweaks */
+    #speechBubble {
+        max-width: 250px !important;
+        min-width: 180px !important;
+        padding: 12px !important;
+    }
+
+    #sbName {
+        font-size: 0.75rem !important;
+    }
+
+    #sbText {
+        font-size: 0.9rem !important;
+    }
+
+
+    /*
+       4. PLAYER.HTML (Interactive Game)
+       ----------------------------------------------------------------------
+       Managing the quest system and 3D matching interface.
+    */
+
+    /* Question UI - The Book View */
+    .book-content {
+        width: 92% !important;
+        padding: 25px !important;
+        border-radius: 25px !important;
+    }
+
+    .q-title {
+        font-size: 1.4rem !important;
+        margin-bottom: 20px !important;
+    }
+
+    .option-grid {
+        grid-template-columns: 1fr !important;
+        /* Single column on mobile */
+        gap: 10px !important;
+        transform: none !important;
+        /* Flat view for easy tapping */
+    }
+
+    .option-orb {
+        padding: 15px !important;
+        font-size: 1rem !important;
+    }
+
+    /* Progress & Score UI */
+    .glass-meter-container {
+        width: 200px !important;
+        height: 40px !important;
+        top: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .score-pill {
+        top: 15px !important;
+        right: 15px !important;
+        padding: 6px 15px !important;
+    }
+
+    .progress-text-container {
+        left: 50% !important;
+        top: 60px !important;
+    }
+
+    .pill-value {
+        font-size: 1.1rem !important;
+    }
+
+    /* Matching Lab - Bestiary Cards */
+    .bestiary-row {
+        gap: 10px !important;
+        padding: 10px !important;
+    }
+
+    .bestiary-case {
+        width: 80vw !important;
+        /* One card at a time on screen */
+    }
+
+    .bestiary-title {
+        font-size: 1.2rem !important;
+    }
+
+    .bestiary-detail h6 {
+        font-size: 0.6rem !important;
+    }
+
+    .bestiary-detail p {
+        font-size: 0.8rem !important;
+    }
+
+    .slider-nav-btn {
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 1.5rem !important;
+    }
+
+    #matchInstructions h1 {
+        font-size: 1.6rem !important;
+    }
+
+    /* Confirm Modal */
+    #confirmModal .book-content {
+        padding: 25px !important;
+        width: 90% !important;
+    }
+
+    #modalName {
+        font-size: 1.5rem !important;
+    }
+
+    .safe-dial-container {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+
+    /*
+       5. ADMIN.HTML (Mission Control)
+       ----------------------------------------------------------------------
+       Optimizing the dashboard for mobile moderators.
+    */
+
+    .dashboard-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        padding: 15px !important;
+        gap: 15px !important;
+        padding-bottom: 120px !important; /* Extra space for sticky buttons */
+    }
+
+    .glass-card h3 {
+        font-size: 1rem !important; /* Further reduce for admin cards */
+    }
+
+    .main-stage {
+        height: 250px !important;
+        /* Shrink the 3D area */
+        order: -1;
+        /* Always keep 3D stage at top */
+    }
+
+    .side-panel {
+        width: 100% !important;
+    }
+
+    .glass-card {
+        padding: 15px !important;
+    }
+
+    .desktop-only-controls {
+        display: none !important;
+    }
+
+    .mobile-only-controls {
+        display: block !important;
+    }
+
+    .action-bar-wrap.mobile-only-controls {
+        position: relative !important;
+        transform: none !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        margin-top: 15px !important;
+    }
+
+    .mobile-only-controls .action-bar {
+        background: rgba(255, 255, 255, 0.03) !important;
+        padding: 5px !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+    }
+
+    .mobile-only-controls .btn-action {
+        flex: 1 1 40% !important;
+        font-size: 0.65rem !important;
+        padding: 12px 6px !important;
+        border-radius: 12px !important;
+    }
+
+    .mobile-only-controls .btn-secondary {
+        flex: 1 1 100% !important;
+    }
+
+    .action-bar button {
+        flex: 1 1 40% !important; /* Flexible sharing of row */
+        font-size: 0.65rem !important; /* Slightly smaller to fit text+icon */
+        padding: 12px 6px !important;
+        border-radius: 12px !important;
+        margin: 0 !important;
+        justify-content: center !important;
+        min-width: 0 !important; /* Allow shrinking */
+        gap: 5px !important; /* Tighter gap between icon and text */
+    }
+
+    #exportBtn {
+        flex: 1 1 100% !important; /* Takes full width row */
+    }
+
+    .action-bar button span {
+        font-size: 0.8rem !important; /* Icon size */
+    }
+
+    .action-bar div[style*="width:1px"] {
+        display: none !important;
+    }
+
+    .stat-pill {
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .participant-list {
+        display: contain !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+    }
+
+    .lb-avatar,
+    .participant-avatar,
+    .lb-avatar-img {
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 12px !important;
+    }
+
+    .orb-count {
+        font-size: 3rem !important;
+    }
+
+
+    /*
+       6. TV.HTML (Global Leaderboard)
+       ----------------------------------------------------------------------
+    */
+
+    .tv-ui {
+        padding: 15px !important;
+        height: 100% !important;
+        overflow-y: auto !important; /* Allow scrolling if it overflows */
+    }
+
+    .tv-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 15px !important;
+        margin-bottom: 20px !important;
+        display: flex !important;
+    }
+
+    .title-group {
+        position: static !important;
+        transform: none !important;
+        text-align: center !important;
+        margin: 10px 0 !important;
+        order: 1; /* Title below mission code */
+    }
+
+    .tv-title {
+        font-size: 1.8rem !important;
+        line-height: 1.1 !important;
+        letter-spacing: -1px !important;
+    }
+
+    .tv-subtitle {
+        font-size: 0.8rem !important;
+        letter-spacing: 2px !important;
+    }
+
+    .tv-logo {
+        display: none !important; /* Removed per user request */
+    }
+
+    .meta-group {
+        display: none !important; /* Removed per user request */
+    }
+
+    .meta-item {
+        padding: 10px 20px !important;
+        min-width: 180px !important;
+        text-align: center !important;
+    }
+
+    .meta-value {
+        font-size: 1.4rem !important;
+    }
+
+    .tv-footer {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 15px !important;
+        position: relative !important;
+        margin-top: 30px !important;
+        padding-bottom: 40px !important;
+    }
+
+    .center-footer {
+        position: static !important;
+        transform: none !important;
+        order: -1; /* Live detectives above mascots */
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    .mascot-glass {
+        display: none !important; /* Removed per user request */
+    }
+
+    .mascot-info h4 {
+        font-size: 0.9rem !important;
+    }
+
+    .call-to-action {
+        font-size: 1.1rem !important;
+    }
+
+    .live-text {
+        font-size: 0.75rem !important;
+    }
+
+
+    /* Admin Quick Stats - No Wrap */
+    .glass-card div[style*="justify-content:space-between"] {
+        gap: 10px !important;
+    }
+
+    .glass-card div[style*="justify-content:space-between"] span {
+        white-space: nowrap !important;
+    }
+
+    /* Admin Tip - Spacing */
+    div[style*="margin-top:40px"] {
+        margin-top: 15px !important;
+        padding: 12px !important;
+    }
+
+    /* QR Overlay Fixes */
+    .overlay-content h1[style*="font-size:2.5rem"] {
+        font-size: 1.8rem !important;
+        margin-top: 20px;
+    }
+
+    #qrcode canvas, #qrcode img {
+        width: 200px !important;
+        height: 200px !important;
+    }
+
+    .fade-anim {
+        animation-duration: 0.5s !important;
+    }
+
+    /* Selfie AR Depth Priority */
+    #webgl-container.selfie-mode {
+        z-index: 150 !important;
+    }
+
+}

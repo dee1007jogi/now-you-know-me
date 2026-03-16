@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Mission Control – Now You Know Me</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/mobile.css">
+    <style>
+        :root {
+            --navy-deep: #020617;
+            --navy-dark: #0f172a;
+            --gold-bright: #fbbf24;
+            --gold-muted: #d97706;
+            --neon-cyan: #22d3ee;
+            --neon-blue: #0ea5e9;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--navy-deep);
+            color: #f8fafc;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* UI STRATA */
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .ui-layer>* {
+            pointer-events: auto;
+        }
+
+        /* HEADER */
+        header {
+            height: 80px;
+            padding: 0 40px;
+            background: linear-gradient(to bottom, rgba(2, 6, 23, 0.9), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-group h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            letter-spacing: -1px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .logo-group span {
+            color: var(--gold-bright);
+        }
+
+        .session-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .session-badge:hover {
+            background: rgba(251, 191, 36, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .session-code {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            color: var(--gold-bright);
+            font-size: 1.2rem;
+        }
+
+        /* MAIN DASHBOARD */
+        .dashboard-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 30px;
+            padding: 30px 40px;
+            margin-bottom: 80px;
+            /* Space for bottom bar */
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* LEADERBOARD (Center) */
+        .leaderboard-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .leaderboard-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .leaderboard-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .leaderboard-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .lb-row {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .lb-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.02) translateX(10px);
+        }
+
+        .lb-rank {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--gold-bright);
+            width: 30px;
+        }
+
+        .lb-player {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .lb-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lb-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .lb-score-wrap {
+            text-align: right;
+        }
+
+        .lb-score {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            font-size: 1.2rem;
+        }
+
+        /* PARTICIPANTS (Left) */
+        .readiness-orb {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(34, 211, 238, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .orb-stats {
+            text-align: center;
+        }
+
+        .orb-count {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            line-height: 1;
+            color: var(--neon-cyan);
+        }
+
+        .orb-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+
+        .participant-list {
+            margin-top: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .mini-bust {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mini-bust img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mini-bust.ready {
+            border-color: #10b981;
+        }
+
+        .mini-bust.waiting {
+            border-color: #ef4444;
+            filter: grayscale(0.8);
+        }
+
+        /* CONTROLS (Right) */
+        .lever-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .lever-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lever-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .lever-card.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+        }
+
+        .lever-card.active .orb-dot {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .lever-info h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .lever-info p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .orb-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ACTION BAR (Bottom) */
+        .action-bar-wrap {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            min-width: 600px;
+            z-index: 100;
+        }
+
+        .action-bar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 12px 30px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 14px 24px;
+            border-radius: 20px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-launch {
+            background: var(--gold-bright);
+            color: #000;
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(251, 191, 36, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fff;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* BACKGROUND ENGINE */
+        #webgl-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* OVERLAYS */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(2, 6, 23, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s;
+            backdrop-filter: blur(20px);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .overlay-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        .hidden, .mobile-only-controls {
+            display: none !important;
+        }
+
+        .animate-pop {
+            animation: pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+</style>
+</head>
+
+<body>
+
+    <!-- 3D ENGINE CONTAINER -->
+    <div id="webgl-container"></div>
+
+    <div class="ui-layer">
+        <!-- HEADER -->
+        <header>
+            <!-- Logo and Code removed for cleaner dashboard -->
+            <div></div> 
+
+
+            <div style="display:flex; gap:20px; align-items:center;">
+                <a href="/tv" target="_blank"
+                    style="text-decoration:none; color:rgba(255,255,255,0.5); font-weight:700; font-size:0.9rem; transition:0.3s;"
+                    onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">📺 Open
+                    TV Mode</a>
+                <button id="logoutBtn"
+                    style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:0.9rem;">Logout</button>
+            </div>
+        </header>
+        
+        <div id="adminMsg" style="position:fixed; top:100px; left:50%; transform:translateX(-50%); width:max-content; padding:10px 20px; border-radius:12px; font-size:1rem; font-weight:800; z-index:1000; pointer-events:none; text-shadow: 0 0 20px rgba(0,0,0,0.8);"></div>
+
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
+
+            <!-- LEFT PANEL: READINESS -->
+            <div class="side-panel">
+                <div class="glass-card" style="flex: 1;">
+                    <h3><span style="color:var(--neon-cyan);">●</span> Mission Readiness</h3>
+
+                    <div class="readiness-orb">
+                        <div class="orb-stats">
+                            <p class="orb-count" id="readyCount">0</p>
+                            <p class="orb-label">Detectives Ready</p>
+                        </div>
+                    </div>
+
+                    <p style="margin-top:20px; font-size:0.8rem; color:rgba(255,255,255,0.4); text-align:center;">
+                        <span id="joinedTotal">0</span> agents have joined the lobby.
+                    </p>
+
+                    <div id="participantGrid" class="participant-list">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- MOBILE ACTION BAR (Integrated in card) -->
+                    <div class="action-bar-wrap mobile-only-controls">
+                        <div class="action-bar">
+                            <button class="btn-action btn-launch mobile-btn-start">🚀 Launch</button>
+                            <button class="btn-action btn-danger mobile-btn-end">🛑 End Game</button>
+                            <button class="btn-action btn-secondary mobile-btn-export">📥 Export</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>🔍 Quick Intelligence</h3>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                            <span style="color:rgba(255,255,255,0.5)">System Status</span>
+                            <span id="pillStatus" style="color:#10b981; font-weight:800;">Lobby ⏳</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                            <span style="color:rgba(255,255,255,0.5)">Mystery Cards</span>
+                            <span id="cardsCount" style="color:var(--gold-bright); font-weight:800;">0 Generated</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER: LEADERBOARD -->
+            <div class="leaderboard-column">
+                <div class="glass-card" style="flex: 1; display: flex; flex-direction: column;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3>📊 Operation Leaderboard</h3>
+                        <p id="lastUpdate" style="font-size:0.7rem; color:rgba(255,255,255,0.2);">UPDATING LIVE...</p>
+                    </div>
+
+                    <div id="lb" class="leaderboard-container">
+                        <!-- Loaded dynamically -->
+                        <div style="padding:40px; text-align:center; opacity:0.3;">
+                            <p>Waiting for the first clue to be solved...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: CONTROLS -->
+            <div class="side-panel">
+                <div class="glass-card" style="flex: 1;">
+                    <h3>🕹️ Command Center</h3>
+
+                    <div class="lever-group">
+                        <div id="leverLobby" class="lever-card active">
+                            <div class="lever-info">
+                                <h4>Assemble Lobby</h4>
+                                <p>Agents joining pre-game</p>
+                            </div>
+                            <div class="orb-dot"></div>
+                        </div>
+
+                        <div id="leverLive" class="lever-card">
+                            <div class="lever-info">
+                                <h4>Go Live!</h4>
+                                <p>Begin the investigation</p>
+                            </div>
+                            <div class="orb-dot"></div>
+                        </div>
+
+                        <div id="leverEnded" class="lever-card">
+                            <div class="lever-info">
+                                <h4>End Operation</h4>
+                                <p>Show final podiums</p>
+                            </div>
+                            <div class="orb-dot"></div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top:40px; padding:20px; border-radius:20px; background:rgba(251, 191, 36, 0.05); border:1px solid rgba(251, 191, 36, 0.1);">
+                        <p style="font-size:0.75rem; color:var(--gold-bright); line-height:1.5;">
+                            <b>ADMIN TIP:</b> Pull the "Go Live" lever only when at least 70% of agents are ready for
+                            maximum engagement.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>⚙️ System</h3>
+                    <button id="resetBtn"
+                        style="width:100%; background:none; border:1px dashed rgba(239, 68, 68, 0.3); padding:12px; border-radius:12px; color:#ef4444; font-size:0.8rem; font-weight:700; cursor:pointer;">♻️
+                        RESET SESSION</button>
+                </div>
+            </div>
+
+        </div>
+
+        </div>
+
+        </div>
+
+        <!-- DESKTOP ACTION BAR (Original Floating Position) -->
+        <div class="action-bar-wrap desktop-only-controls">
+            <div class="action-bar">
+                <button id="startBtn" class="btn-action btn-launch">🚀 Launch Operation</button>
+                <button id="endBtn" class="btn-action btn-danger">🛑 End Game</button>
+                <div style="width:1px; height:30px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
+                <button id="exportBtn" class="btn-action btn-secondary">📥 Export Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR OVERLAY -->
+    <div id="qrOverlay" class="overlay">
+        <div class="overlay-content animate-pop">
+            <h1
+                style="font-family:'Outfit'; font-weight:900; font-size:2.5rem; color:var(--gold-bright); margin-bottom:10px;">
+                Scan to Join</h1>
+            <p style="color:rgba(255,255,255,0.6); margin-bottom:30px;">Point your phone camera here to become a
+                detective.</p>
+
+            <div id="qrcode"
+                style="background:white; padding:20px; border-radius:30px; display:inline-block; margin-bottom:30px;">
+            </div>
+
+            <div>
+                <p style="font-size:0.8rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">WEBSITE URL</p>
+                <p id="joinUrl" style="font-weight:700; color:var(--neon-cyan); letter-spacing:1px;"></p>
+            </div>
+
+            <button id="closeQr" class="btn-pixar"
+                style="margin-top:40px; background:var(--gold-bright); color:#000; padding:15px 40px; border-radius:20px; border:none; font-weight:900; cursor:pointer;">CLOSE
+                MONITOR</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/mobile3d.js"></script>
+    <script src="/engine3d.js"></script>
+    <script src="/admin.js"></script>
+
+</body>
+
+</html>
