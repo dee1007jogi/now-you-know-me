@@ -72,7 +72,8 @@ const upload = multer({
 
 // ---- Helpers ----
 async function getLeaderboard() {
-    const players = MONGO_URI ? await Player.find() : []; // Simplification for memory mode
+    // 🚀 OPTIMIZATION: Do NOT fetch photoUrl here. It's too heavy for global broadcasts.
+    const players = MONGO_URI ? await Player.find().select("-photoUrl") : []; 
     const arr = players.map(p => {
         const pObj = p.toObject ? p.toObject() : p;
         return {
@@ -102,14 +103,19 @@ async function getLeaderboard() {
 
 async function emitState() {
     const g = await getGameState();
-    const players = MONGO_URI ? await Player.find() : [];
+    
+    // 🚀 OPTIMIZATION: Use countDocuments instead of fetching all players into RAM
+    const playersCount = MONGO_URI ? await Player.countDocuments() : 0;
+    const readyCount = MONGO_URI ? await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }) : 0;
+    const cardsCount = MONGO_URI ? await Player.countDocuments({ answers: { $exists: true } }) : 0;
+    
     const leaderboard = await getLeaderboard();
     
     io.emit("state", {
         status: g.status,
-        playersCount: players.length,
-        readyCount: players.filter(p => p.photoUrl && p.answers).length,
-        cardsCount: players.filter(p => p.answers).length,
+        playersCount,
+        readyCount,
+        cardsCount,
         leaderboard
     });
 }
