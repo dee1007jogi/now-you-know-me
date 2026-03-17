@@ -11,34 +11,37 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.json({ limit: "5mb" })); // Increased for Base64 photos
-app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+app.use(express.json({ limit: "15mb" })); 
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // ---- MongoDB Connection ----
 const MONGO_URI = process.env.MONGO_URI;
+let dbConnected = false;
+
 if (MONGO_URI) {
     mongoose.connect(MONGO_URI, {
         serverSelectionTimeoutMS: 5000,
         connectTimeoutMS: 10000,
     })
-        .then(() => console.log("✅ Connected to MongoDB"))
-        .catch(err => console.error("❌ MongoDB Connection Error. Did you allow IP 0.0.0.0/0 in Atlas?", err));
+        .then(() => {
+            console.log("✅ Connected to MongoDB");
+            dbConnected = true;
+        })
+        .catch(err => console.error("❌ MongoDB Connection Error:", err));
     
-    // 🚀 CRITICAL: Disable buffering so requests don't hang if DB is slow
     mongoose.set('bufferCommands', false);
-}
- else {
-    console.warn("⚠️  MONGO_URI not found. Running with in-memory fallback (state will NOT persist).");
+} else {
+    console.warn("⚠️  MONGO_URI not found. Running with in-memory fallback.");
 }
 
 // ---- Schemas ----
 const playerSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    photoUrl: String, // Will store Base64 data if disk is ephemeral
+    photoUrl: String,
     answers: Object,
     score: { type: Number, default: 0 },
     correct: { type: Number, default: 0 },
@@ -47,6 +50,7 @@ const playerSchema = new mongoose.Schema({
     cooldownUntil: { type: Number, default: 0 },
     openedAt: { type: Map, of: Number, default: {} },
     attemptsPerCard: { type: Map, of: Number, default: {} },
+    matchedCards: { type: [String], default: [] }, // Track completed cards
     correctTimes: [Number],
     cardId: String
 });
@@ -59,45 +63,88 @@ const gameSchema = new mongoose.Schema({
 const Player = mongoose.model("Player", playerSchema);
 const Game = mongoose.model("Game", gameSchema);
 
-// In-memory fallback if no DB
-let memoryState = { status: "lobby", sessionCode: "123456" };
+// ---- Memory Store (The Source of Truth for local speed) ----
+let memoryState = { status: "lobby", sessionCode: Math.floor(100000 + Math.random() * 900000).toString() };
+let playersMap = new Map(); // id -> player object
 
 async function getGameState() {
     try {
-        if (!MONGO_URI) return memoryState;
+        if (!MONGO_URI || !dbConnected) return memoryState;
         let g = await Game.findOne();
         if (!g) g = await Game.create({});
         return g;
     } catch (e) {
-        console.error("⚠️ Error fetching Game State, using memory fallback.");
         return memoryState;
     }
 }
 
-// ---- File upload setup (Memory Storage for Base64) ----
+async function getPlayer(id) {
+    // 1. Check Memory First
+    if (playersMap.has(id)) return playersMap.get(id);
+    
+    // 2. Check DB
+    if (MONGO_URI && dbConnected) {
+        try {
+            const p = await Player.findOne({ id });
+            if (p) {
+                const pObj = p.toObject();
+                playersMap.set(id, pObj);
+                return pObj;
+            }
+        } catch (e) {}
+    }
+    return null;
+}
+
+async function savePlayer(pObj) {
+    // 1. Update Memory (INSTANT)
+    playersMap.set(pObj.id, pObj);
+    
+    // 2. Sync to DB in background (FIRE AND FORGET)
+    if (MONGO_URI && dbConnected) {
+        setImmediate(() => {
+            Player.findOneAndUpdate({ id: pObj.id }, pObj, { upsert: true })
+                .catch(e => console.error("❌ DB Sync Error:", e.message));
+        });
+    }
+}
+
+// ---- File upload setup ----
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 2 * 1024 * 1024 } // 2 MB
+    limits: { fileSize: 15 * 1024 * 1024 }
 });
 
 // ---- Helpers ----
 async function getLeaderboard() {
-    // 🚀 OPTIMIZATION: Do NOT fetch photoUrl here. It's too heavy for global broadcasts.
-    const players = MONGO_URI ? await Player.find().select("-photoUrl") : []; 
-    const arr = players.map(p => {
-        const pObj = p.toObject ? p.toObject() : p;
+    // Merge Memory and DB
+    let all = Array.from(playersMap.values());
+    
+    if (MONGO_URI && dbConnected) {
+        try {
+            const dbPlayers = await Player.find().select("-photoUrl");
+            dbPlayers.forEach(p => {
+                const pObj = p.toObject();
+                if (!playersMap.has(pObj.id)) {
+                    all.push(pObj);
+                }
+            });
+        } catch (e) {}
+    }
+
+    const arr = all.map(p => {
         return {
-            id: pObj.id,
-            name: pObj.name,
-            photoUrl: pObj.photoUrl,
-            score: pObj.score,
-            correct: pObj.correct,
-            wrong: pObj.wrong,
-            accuracy: (pObj.correct + pObj.wrong)
-                ? Math.round((pObj.correct / (pObj.correct + pObj.wrong)) * 100)
+            id: p.id,
+            name: p.name,
+            photoUrl: p.photoUrl,
+            score: p.score || 0,
+            correct: p.correct || 0,
+            wrong: p.wrong || 0,
+            accuracy: (p.correct + p.wrong)
+                ? Math.round((p.correct / (p.correct + p.wrong)) * 100)
                 : 0,
-            avgCorrectSec: pObj.correctTimes.length
-                ? Math.round(pObj.correctTimes.reduce((a, b) => a + b, 0) / pObj.correctTimes.length)
+            avgCorrectSec: (p.correctTimes && p.correctTimes.length)
+                ? Math.round(p.correctTimes.reduce((a, b) => a + b, 0) / p.correctTimes.length)
                 : null
         };
     });
@@ -112,37 +159,30 @@ async function getLeaderboard() {
 }
 
 async function emitState() {
-    try {
-        const g = await getGameState();
-        
-        let playersCount = 0;
-        let readyCount = 0;
-        let cardsCount = 0;
-        let leaderboard = [];
+    // Run broadcast in next tick to keep API response instantaneous
+    setImmediate(async () => {
+        try {
+            const g = await getGameState();
+            const leaderboard = await getLeaderboard();
+            
+            const readyCount = Array.from(playersMap.values()).filter(p => p.photoUrl && p.answers).length;
+            const cardsCount = Array.from(playersMap.values()).filter(p => p.answers).length;
 
-        // 🚀 ULTRA-SAFE: Only talk to DB if readyState is 1 (Connected)
-        if (MONGO_URI && mongoose.connection.readyState === 1) {
-            playersCount = await Player.countDocuments().catch(() => 0);
-            readyCount = await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }).catch(() => 0);
-            cardsCount = await Player.countDocuments({ answers: { $exists: true } }).catch(() => 0);
-            leaderboard = await getLeaderboard().catch(() => []);
-        } else {
-            console.log("📡 Skipping DB counts in emitState (DB not ready)");
+            io.emit("state", {
+                status: g.status,
+                playersCount: playersMap.size,
+                readyCount,
+                cardsCount,
+                leaderboard
+            });
+        } catch (err) {
+            console.error("❌ emitState Error:", err);
         }
-        
-        io.emit("state", {
-            status: g.status,
-            playersCount,
-            readyCount,
-            cardsCount,
-            leaderboard
-        });
-    } catch (err) {
-        console.error("❌ emitState Error:", err);
-    }
+    });
 }
 
 function buildClues(answers) {
+    if (!answers) return [];
     return [
         { label: "Work style", value: answers.workStyle },
         { label: "Team role", value: answers.teamRole },
@@ -154,227 +194,200 @@ function buildClues(answers) {
     ];
 }
 
-// ---- Page routes ----
+// ---- Routes ----
+app.use((req, res, next) => {
+    console.log(`🌐 [${req.method}] ${req.url} - ${new Date().toLocaleTimeString()}`);
+    next();
+});
+
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/player", (req, res) => res.sendFile(path.join(__dirname, "public", "player.html")));
 app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
 app.get("/tv", (req, res) => res.sendFile(path.join(__dirname, "public", "tv.html")));
 
-// ---- API: Join ----
 app.post("/api/join", async (req, res) => {
-    console.log("📩 Join request received:", req.body);
     try {
         const g = await getGameState();
-        if (g.status !== "lobby")
-            return res.status(400).json({ error: "Game already started" });
+        if (g.status !== "lobby") return res.status(400).json({ error: "Game already started" });
 
         const name = String(req.body.name || "").trim();
         if (!name) return res.status(400).json({ error: "Name required" });
 
         const id = nanoid(8);
-        const newPlayer = { id, name };
+        const newPlayer = {
+            id, name,
+            score: 0, correct: 0, wrong: 0, streak: 0,
+            correctTimes: [], openedAt: {}, attemptsPerCard: {}, matchedCards: []
+        };
         
-        // 🚀 INSTANT RESPONSE: Tell the client they are in before doing heavy DB work
+        await savePlayer(newPlayer);
         res.json({ playerId: id });
-
-        // 🔄 BACKGROUND TASK: Save to DB in the background
-        setImmediate(async () => {
-            try {
-                if (MONGO_URI && mongoose.connection.readyState === 1) {
-                    console.log("💾 [Background] Saving player:", name);
-                    await Player.create(newPlayer);
-                } else {
-                    console.log("📝 [Background] DB not ready, skipping save.");
-                }
-                emitState().catch(e => console.error("Emit error:", e));
-            } catch (err) {
-                console.error("❌ Background Save Error:", err);
-            }
-        });
-        
+        emitState();
     } catch (err) {
-        console.error("❌ CRITICAL JOIN ERROR:", err);
-        // If we haven't sent a response yet, send a 500
-        if (!res.headersSent) {
-            res.status(500).json({ error: "System failure. Try again." });
-        }
+        res.status(500).json({ error: "Join failed." });
     }
 });
 
-// ---- API: Upload photo (Stored as Base64) ----
 app.post("/api/upload-photo", upload.single("photo"), async (req, res) => {
-    const playerId = String(req.body.playerId || "").trim();
-    const p = MONGO_URI ? await Player.findOne({ id: playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
+    try {
+        const playerId = String(req.body.playerId || "").trim();
+        const p = await getPlayer(playerId);
+        if (!p) return res.status(404).json({ error: "Player not found" });
 
-    const g = await getGameState();
-    if (g.status !== "lobby")
-        return res.status(400).json({ error: "Cannot upload after start" });
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+        const g = await getGameState();
+        if (g.status !== "lobby") return res.status(400).json({ error: "Cannot upload after start" });
+        if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    // Convert to Base64
-    const b64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
-    p.photoUrl = b64;
-    await p.save();
-
-    emitState();
-    res.json({ ok: true, photoUrl: p.photoUrl });
+        const b64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+        p.photoUrl = b64;
+        
+        await savePlayer(p);
+        res.json({ ok: true, photoUrl: p.photoUrl });
+        emitState();
+    } catch (err) {
+        res.status(500).json({ error: "Upload failed." });
+    }
 });
 
-// ---- API: Submit answers ----
 app.post("/api/submit-answers", async (req, res) => {
-    const { playerId, answers } = req.body;
-    const p = MONGO_URI ? await Player.findOne({ id: playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
+    try {
+        const { playerId, answers } = req.body;
+        const p = await getPlayer(playerId);
+        if (!p) return res.status(404).json({ error: "Player not found" });
 
-    const g = await getGameState();
-    if (g.status !== "lobby")
-        return res.status(400).json({ error: "Cannot submit after start" });
+        const g = await getGameState();
+        if (g.status !== "lobby") return res.status(400).json({ error: "Cannot submit after start" });
 
-    const required = [
-        "workStyle", "teamRole", "meetingPower",
-        "breakStyle", "updatesVia", "recharge", "surprisingSkill"
-    ];
-    for (const k of required) {
-        if (!answers || !String(answers[k] || "").trim())
-            return res.status(400).json({ error: `Missing: ${k}` });
+        p.answers = answers;
+        if (!p.cardId) p.cardId = nanoid(6);
+        
+        await savePlayer(p);
+        res.json({ ok: true, cardId: p.cardId });
+        emitState();
+    } catch (err) {
+        res.status(500).json({ error: "Submit failed." });
     }
-
-    const bad = ["fuck", "shit", "bitch", "asshole"];
-    const skillLower = String(answers.surprisingSkill).toLowerCase();
-    if (bad.some(w => skillLower.includes(w)))
-        return res.status(400).json({ error: "Please keep it professional." });
-
-    p.answers = answers;
-    if (!p.cardId) p.cardId = nanoid(6);
-    await p.save();
-
-    emitState();
-    res.json({ ok: true, cardId: p.cardId });
 });
 
-// ---- API: Get mystery cards ----
 app.get("/api/cards/:playerId", async (req, res) => {
-    const p = MONGO_URI ? await Player.findOne({ id: req.params.playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
+    try {
+        const p = await getPlayer(req.params.playerId);
+        if (!p) return res.status(404).json({ error: "Player not found" });
 
-    const g = await getGameState();
-    if (g.status !== "live")
-        return res.status(400).json({ error: "Game not live" });
+        const g = await getGameState();
+        if (g.status !== "live") return res.status(400).json({ error: "Game not live" });
 
-    const all = await Player.find({ id: { $ne: p.id }, answers: { $exists: true, $ne: null } });
-    const cards = all.map(c => ({
-        cardId: c.cardId,
-        clues: buildClues(c.answers)
-    }));
-    res.json({ cards });
+        const all = Array.from(playersMap.values()).filter(c => 
+            c.id !== p.id && 
+            c.answers && 
+            !(p.matchedCards || []).includes(c.cardId)
+        );
+        const cards = all.map(c => ({
+            cardId: c.cardId,
+            clues: buildClues(c.answers)
+        }));
+        res.json({ cards });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch cards." });
+    }
 });
 
-// ---- API: Get photo grid ----
 app.get("/api/people/:playerId", async (req, res) => {
-    const p = MONGO_URI ? await Player.findOne({ id: req.params.playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
+    try {
+        const p = await getPlayer(req.params.playerId);
+        if (!p) return res.status(404).json({ error: "Player not found" });
 
-    const g = await getGameState();
-    if (g.status !== "live")
-        return res.status(400).json({ error: "Game not live" });
+        const g = await getGameState();
+        if (g.status !== "live") return res.status(400).json({ error: "Game not live" });
 
-    let people = await Player.find({ id: { $ne: p.id }, photoUrl: { $exists: true, $ne: null } })
-        .select("id name photoUrl");
+        let people = Array.from(playersMap.values())
+            .filter(x => x.id !== p.id && x.photoUrl)
+            .map(x => ({ id: x.id, name: x.name, photoUrl: x.photoUrl }));
 
-    people = people.map(x => ({ id: x.id, name: x.name, photoUrl: x.photoUrl }));
-
-    // Shuffle
-    for (let i = people.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [people[i], people[j]] = [people[j], people[i]];
-    }
-    res.json({ people });
-});
-
-// ---- API: Open card ----
-app.post("/api/open-card", async (req, res) => {
-    const { playerId, cardId } = req.body;
-    const p = MONGO_URI ? await Player.findOne({ id: playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
-
-    const g = await getGameState();
-    if (g.status !== "live")
-        return res.status(400).json({ error: "Game not live" });
-
-    if (!p.openedAt.has(cardId)) {
-        p.openedAt.set(cardId, Date.now());
-        await p.save();
-    }
-    res.json({ ok: true });
-});
-
-// ---- API: Attempt match ----
-app.post("/api/attempt", async (req, res) => {
-    const { playerId, cardId, guessedPersonId } = req.body;
-    const p = MONGO_URI ? await Player.findOne({ id: playerId }) : null;
-    if (!p) return res.status(404).json({ error: "Player not found" });
-
-    const g = await getGameState();
-    if (g.status !== "live")
-        return res.status(400).json({ error: "Game not live" });
-
-    if (Date.now() < p.cooldownUntil)
-        return res.status(400).json({ error: "Cooldown active. Wait a moment." });
-
-    const target = await Player.findOne({ cardId });
-    if (!target) return res.status(404).json({ error: "Card not found" });
-    if (target.id === p.id)
-        return res.status(400).json({ error: "You cannot match your own card." });
-
-    const currentAttempts = p.attemptsPerCard.get(cardId) || 0;
-    if (currentAttempts >= 2)
-        return res.status(400).json({ error: "Card locked (max attempts reached)." });
-
-    p.attemptsPerCard.set(cardId, currentAttempts + 1);
-
-    const isCorrect = target.id === guessedPersonId;
-    let delta = 0, speedBonus = 0, streakBonus = 0;
-
-    if (isCorrect) {
-        delta += 10;
-        const openedTs = p.openedAt.get(cardId);
-        if (openedTs) {
-            const elapsedSec = Math.floor((Date.now() - openedTs) / 1000);
-            p.correctTimes.push(elapsedSec);
-            if (elapsedSec <= 60) speedBonus = 5;
-            else if (elapsedSec <= 120) speedBonus = 3;
+        for (let i = people.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [people[i], people[j]] = [people[j], people[i]];
         }
-        delta += speedBonus;
-        p.correct += 1;
-        p.streak += 1;
-        if (p.streak === 2) streakBonus = 5;
-        if (p.streak >= 3) streakBonus = 10;
-        delta += streakBonus;
-    } else {
-        delta -= 3;
-        p.wrong += 1;
-        p.streak = 0;
-        p.cooldownUntil = Date.now() + 30_000;
+        res.json({ people });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch grid." });
     }
-
-    p.score = Math.max(0, p.score + delta);
-    await p.save();
-
-    emitState();
-    res.json({ correct: isCorrect, delta, speedBonus, streakBonus, score: p.score });
 });
 
-// ---- Admin endpoints ----
+app.post("/api/open-card", async (req, res) => {
+    try {
+        const { playerId, cardId } = req.body;
+        const p = await getPlayer(playerId);
+        if (!p) return res.status(404).json({ error: "Player not found" });
+
+        if (!p.openedAt) p.openedAt = {};
+        if (!p.openedAt[cardId]) {
+            p.openedAt[cardId] = Date.now();
+            await savePlayer(p);
+        }
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ ok: false });
+    }
+});
+
+app.post("/api/attempt", async (req, res) => {
+    try {
+        const { playerId, cardId, guessedPersonId } = req.body;
+        const p = await getPlayer(playerId);
+        const target = Array.from(playersMap.values()).find(x => x.cardId === cardId);
+        
+        if (!p || !target) return res.status(404).json({ error: "Player or card not found" });
+
+        // No cooldown check as per request ("no sleep mode")
+
+        if (!p.attemptsPerCard) p.attemptsPerCard = {};
+        const currentAttempts = p.attemptsPerCard[cardId] || 0;
+        if (currentAttempts >= 2) return res.status(400).json({ error: "Card locked" });
+
+        p.attemptsPerCard[cardId] = currentAttempts + 1;
+
+        const isCorrect = target.id === guessedPersonId;
+        let delta = 0, speedBonus = 0, streakBonus = 0;
+
+        if (isCorrect) {
+            delta += 10;
+            if (!p.matchedCards) p.matchedCards = [];
+            if (!p.matchedCards.includes(cardId)) p.matchedCards.push(cardId);
+
+            const openedTs = p.openedAt ? p.openedAt[cardId] : null;
+            if (openedTs) {
+                const elapsedSec = Math.floor((Date.now() - openedTs) / 1000);
+                p.correctTimes.push(elapsedSec);
+                if (elapsedSec <= 60) speedBonus = 5;
+                else if (elapsedSec <= 120) speedBonus = 3;
+            }
+            delta += speedBonus;
+            p.correct = (p.correct || 0) + 1;
+            p.streak = (p.streak || 0) + 1;
+            if (p.streak === 2) streakBonus = 5;
+            if (p.streak >= 3) streakBonus = 10;
+            delta += streakBonus;
+        } else {
+            delta -= 3;
+            p.wrong = (p.wrong || 0) + 1;
+            p.streak = 0;
+            // Removed cooldownUntil as per request ("no sleep mode")
+        }
+
+        p.score = Math.max(0, (p.score || 0) + delta);
+        await savePlayer(p);
+        emitState();
+        res.json({ correct: isCorrect, delta, speedBonus, streakBonus, score: p.score });
+    } catch (err) {
+        res.status(500).json({ error: "Attempt failed." });
+    }
+});
+
 app.post("/api/admin/start", async (req, res) => {
-    const readyCount = await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } });
-    if (readyCount < 2)
-        return res.status(400).json({ error: "Need at least 2 ready players." });
-    
     const g = await getGameState();
     g.status = "live";
-    await g.save();
-    
+    if (MONGO_URI && dbConnected) await g.save();
     emitState();
     res.json({ ok: true });
 });
@@ -382,17 +395,21 @@ app.post("/api/admin/start", async (req, res) => {
 app.post("/api/admin/end", async (req, res) => {
     const g = await getGameState();
     g.status = "ended";
-    await g.save();
+    if (MONGO_URI && dbConnected) await g.save();
     emitState();
     res.json({ ok: true });
 });
 
 app.post("/api/admin/reset", async (req, res) => {
-    if (MONGO_URI) {
+    playersMap.clear();
+    memoryState.status = "lobby";
+    memoryState.sessionCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    if (MONGO_URI && dbConnected) {
         await Player.deleteMany({});
         const g = await getGameState();
         g.status = "lobby";
-        g.sessionCode = Math.floor(100000 + Math.random() * 900000).toString();
+        g.sessionCode = memoryState.sessionCode;
         await g.save();
     }
     emitState();
@@ -415,37 +432,10 @@ app.get("/api/admin/export", async (req, res) => {
     res.send(csv);
 });
 
-// ---- Socket.IO ----
 io.on("connection", async (socket) => {
-    console.log("🔌 New socket connection");
-    try {
-        const g = await getGameState();
-        const leaderboard = await getLeaderboard().catch(() => []);
-        
-        const playersCount = MONGO_URI && mongoose.connection.readyState === 1 ? await Player.countDocuments().catch(() => 0) : 0;
-        const readyCount = MONGO_URI && mongoose.connection.readyState === 1 ? await Player.countDocuments({ photoUrl: { $exists: true }, answers: { $exists: true } }).catch(() => 0) : 0;
-
-        socket.emit("state", {
-            status: g.status,
-            playersCount,
-            readyCount,
-            cardsCount: readyCount,
-            leaderboard
-        });
-    } catch (err) {
-        console.error("🔌 Socket Connection Error Handled:", err);
-    }
+    emitState();
 });
 
-// 🛡️ GLOBAL PROCESS SHIELD
-process.on('uncaughtException', (err) => {
-    console.error('💥 UNCAUGHT EXCEPTION:', err);
-});
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 UNHANDLED REJECTION:', reason);
-});
-
-// ---- Start ----
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`\n  🎮  Now You Know Me — Server running at http://localhost:${PORT}`);

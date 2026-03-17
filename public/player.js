@@ -731,26 +731,42 @@ document.getElementById("submitAnswersBtn").onclick = async () => {
     btn.disabled = true;
 
     try {
+        console.log("Submitting answers for:", playerId);
         const res = await fetch("/api/submit-answers", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ playerId, answers: userAnswers })
         });
-        if (!res.ok) throw new Error("Submit Failed");
+        
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || "Submit Failed");
+        }
+        
+        // Update local state immediately so checkShowWaiting can transition even before socket update
+        if (!currentUserData) currentUserData = { id: playerId };
         currentUserData.answers = userAnswers;
+        
+        console.log("Submit success, transitioning...");
         checkShowWaiting();
     } catch (e) {
+        console.error("Submit error:", e);
         btn.innerText = "Retry Submit";
         btn.disabled = false;
+        alert("Saving failed: " + e.message + ". Please check your connection.");
     }
 };
 
 function checkShowWaiting() {
-    if (!currentUserData) return;
+    // If we have local answers/photoUrl, we can transition even if socket state hasn't caught up
+    const hasAnswers = (currentUserData && currentUserData.answers) || (userAnswers && userAnswers.surprisingSkill);
+    const hasPhoto = (currentUserData && currentUserData.photoUrl) || (currentUserData && currentUserData.photoUrl === "done");
 
-    if (!currentUserData.photoUrl) {
+    console.log("Checking transition status:", { hasPhoto, hasAnswers, status: appState.status });
+
+    if (!hasPhoto) {
         transitionTo("photo");
-    } else if (!currentUserData.answers) {
+    } else if (!hasAnswers) {
         transitionTo("questions");
         renderQuestion();
     } else {
@@ -800,8 +816,20 @@ async function loadCards() {
                 row.appendChild(cardEl);
             });
             updateSliderView();
+        } else {
+            // All cards matched! Redirect to leaderboard view.
+            if (appState && appState.status === "live") {
+                console.log("Missions complete! Redirecting to endgame screen.");
+                transitionTo("ended");
+                if (currentUserData) {
+                    const rank = appState.leaderboard.findIndex(x => x.id === playerId) + 1;
+                    document.getElementById("finalScore").innerHTML = `✨ ALL CAUGHT! ✨<br/>⭐ ${currentUserData.score} pts<br/><small>Rank #${rank || '?'}</small>`;
+                }
+            }
         }
-    } catch (e) { }
+    } catch (e) {
+        console.error("Failed to load cards:", e);
+    }
 }
 
 function updateSliderView() {
