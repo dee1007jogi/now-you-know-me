@@ -1040,11 +1040,13 @@
                 }
 
                 let data;
+                const clonedRes = res.clone();
                 try {
                     data = await res.json();
                 } catch (jsonErr) {
-                    console.error("JSON Parse Error:", jsonErr);
-                    throw new Error("Invalid response from server. Please refresh.");
+                    const rawText = await clonedRes.text().catch(() => "No text");
+                    console.error("JSON Parse Error. Raw response:", rawText);
+                    throw new Error("Server responded with invalid data. Please refresh.");
                 }
                 
                 if (!data || !data.playerId) throw new Error("Join failed: No Player ID returned.");
