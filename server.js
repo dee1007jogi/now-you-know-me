@@ -3,7 +3,13 @@ const express = require("express");
 const http = require("http");
 const path = require("path");
 const multer = require("multer");
-const { nanoid } = require("nanoid");
+// Manual random ID generator to avoid ESM/CJS issues on different platforms
+const randomID = (len = 8) => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let res = "";
+    for (let i = 0; i < len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+    return res;
+};
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
@@ -213,7 +219,7 @@ app.post("/api/join", async (req, res) => {
         const name = String(req.body.name || "").trim();
         if (!name) return res.status(400).json({ error: "Name required" });
 
-        const id = nanoid(8);
+        const id = randomID(8);
         const newPlayer = {
             id, name,
             score: 0, correct: 0, wrong: 0, streak: 0,
@@ -221,8 +227,10 @@ app.post("/api/join", async (req, res) => {
         };
         
         await savePlayer(newPlayer);
-        res.json({ playerId: id });
-        emitState();
+        res.status(200).json({ playerId: id });
+        
+        // Broadcast in next tick
+        setTimeout(() => emitState(), 10);
     } catch (err) {
         res.status(500).json({ error: "Join failed." });
     }
@@ -259,11 +267,11 @@ app.post("/api/submit-answers", async (req, res) => {
         if (g.status !== "lobby") return res.status(400).json({ error: "Cannot submit after start" });
 
         p.answers = answers;
-        if (!p.cardId) p.cardId = nanoid(6);
+        if (!p.cardId) p.cardId = randomID(6);
         
         await savePlayer(p);
         res.json({ ok: true, cardId: p.cardId });
-        emitState();
+        setTimeout(() => emitState(), 10);
     } catch (err) {
         res.status(500).json({ error: "Submit failed." });
     }
