@@ -602,20 +602,17 @@ app.post("/api/guess", async (req, res) => {
             else if (elapsed <= 40) scoreDelta = 150;
             else if (elapsed <= 60) scoreDelta = 100;
             else scoreDelta = 70;
-
-            p.pendingGuess = {
-                guessedPersonId,
-                targetId,
-                isCorrect,
-                scoreDelta,
-                elapsed
-            };
         } else {
             scoreDelta = -30;
-            p.wrong = (p.wrong || 0) + 1;
-            p.score = Math.max(0, (p.score || 0) + scoreDelta);
-            p.pendingGuess = null;
         }
+
+        p.pendingGuess = {
+            guessedPersonId,
+            targetId,
+            isCorrect,
+            scoreDelta,
+            elapsed
+        };
 
         await savePlayer(p);
         res.json({ success: true, isCorrect, scoreDelta, guessedName: guessedPlayer.name, targetName: targetPlayer.name });
@@ -660,10 +657,15 @@ app.post("/api/submit-selfie", upload.single("photo"), async (req, res) => {
 
         // Apply points and advance
         p.score = Math.max(0, (p.score || 0) + p.pendingGuess.scoreDelta);
-        p.correct = (p.correct || 0) + 1;
-        p.correctTimes.push(p.pendingGuess.elapsed);
-        p.photoUrl = b64; // Update photo on leaderboard with the correct selfie
-        p.currentGuessIndex = (p.currentGuessIndex || 0) + 1;
+        
+        if (p.pendingGuess.isCorrect) {
+            p.correct = (p.correct || 0) + 1;
+            p.correctTimes.push(p.pendingGuess.elapsed);
+            p.photoUrl = b64; // Update photo on leaderboard with the correct selfie
+            p.currentGuessIndex = (p.currentGuessIndex || 0) + 1;
+        } else {
+            p.wrong = (p.wrong || 0) + 1;
+        }
 
         p.pendingGuess = null;
 

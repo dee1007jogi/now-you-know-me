@@ -388,14 +388,27 @@
     <div id="resultModal" class="hidden" style="position: absolute; inset: 0; z-index: 150; background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; text-align: center;">
         <div style="padding: 40px; border-radius: 20px; background: rgba(30, 41, 59, 0.95); border: 2px solid #38bdf8; max-width: 90%; width: 500px;">
             <h2 id="resultModalTitle" style="font-size: 2.5rem; margin-bottom: 10px; color: #fbbf24;">Processing...</h2>
-            <p id="resultModalText" style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 30px;">Analyzing your guess and uploading selfie...</p>
-            <button class="submit-btn hidden" id="resultNextBtn" onclick="closeResultModal()" style="background: linear-gradient(90deg, #10b981, #059669);">
-                CONTINUE
-            </button>
+            <p id="resultModalText" style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 30px;">Analyzing your guess...</p>
+            
+            <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+                <button class="submit-btn hidden" id="btnCancel" style="flex: 1; min-width: 120px; background: #475569; position: static; transform: none; border-radius: 12px; padding: 14px;">CANCEL</button>
+                <button class="submit-btn hidden" id="btnCrack" style="flex: 2; min-width: 180px; background: linear-gradient(90deg, #d97706, #fbbf24); position: static; transform: none; border-radius: 12px; padding: 14px;">CRACK THE CASE</button>
+                <button class="submit-btn hidden" id="btnCamera" style="flex: 1; min-width: 200px; background: linear-gradient(90deg, #10b981, #059669); position: static; transform: none; border-radius: 12px; padding: 14px;">TAKE SELFIE 📸</button>
+                <button class="submit-btn hidden" id="btnNext" style="flex: 1; min-width: 200px; background: linear-gradient(90deg, #3b82f6, #2563eb); position: static; transform: none; border-radius: 12px; padding: 14px;">CONTINUE</button>
+            </div>
         </div>
     </div>
 
-    <input type="file" id="selfieInput" accept="image/*" capture="environment" style="display: none;" onchange="processGuessAndSelfie(event)">
+    <!-- CAMERA MODAL -->
+    <div id="cameraModal" class="hidden" style="position: fixed; inset: 0; z-index: 200; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <video id="cameraVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        
+        <div style="position: absolute; bottom: 40px; display: flex; gap: 20px;">
+            <button onclick="closeCamera()" style="background: rgba(255,255,255,0.2); border: 2px solid white; color: white; padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; backdrop-filter: blur(5px);">CANCEL</button>
+            <button onclick="takeSnapshot()" style="background: white; border: none; color: black; padding: 15px 40px; border-radius: 30px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">📸 CAPTURE</button>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>

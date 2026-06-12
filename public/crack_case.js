@@ -88,8 +88,28 @@ async function loadCards() {
 }
 
 function showSelfieModal(targetName) {
-    document.getElementById("selfieTargetName").innerText = targetName;
-    document.getElementById("selfieModal").classList.remove("hidden");
+    const modal = document.getElementById("resultModal");
+    const title = document.getElementById("resultModalTitle");
+    const text = document.getElementById("resultModalText");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnCrack = document.getElementById("btnCrack");
+    const btnCamera = document.getElementById("btnCamera");
+    const btnNext = document.getElementById("btnNext");
+
+    title.innerText = "Selfie Time! 📸";
+    title.style.color = "#38bdf8";
+    text.innerHTML = `Go find <strong>${targetName}</strong> and take a selfie with them to prove it!`;
+
+    btnCancel.classList.add("hidden");
+    btnCrack.classList.add("hidden");
+    btnNext.classList.add("hidden");
+    btnCamera.classList.remove("hidden");
+
+    btnCamera.onclick = () => {
+        openCamera();
+    };
+
+    modal.classList.remove("hidden");
 }
 
 let timerInterval = null;
@@ -216,95 +236,121 @@ window.selectSuspect = function(id, element) {
         element.classList.add("selected");
     }
     
-    const submitBtn = document.getElementById("submitMatchBtn");
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        if (window.innerWidth <= 768) {
-            submitBtn.classList.add("show");
-        }
-    }
-}
+    const suspectName = element.querySelector("strong").innerText;
 
-window.submitSelectedMatch = async function() {
-    if (!selectedSuspectId) return;
-
-    // Show loading modal
+    // Show Confirmation Modal
     const modal = document.getElementById("resultModal");
     const title = document.getElementById("resultModalTitle");
     const text = document.getElementById("resultModalText");
-    const btn = document.getElementById("resultNextBtn");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnCrack = document.getElementById("btnCrack");
+    const btnCamera = document.getElementById("btnCamera");
+    const btnNext = document.getElementById("btnNext");
+
+    title.innerText = "Confirm Suspect";
+    title.style.color = "#fbbf24";
+    text.innerHTML = `Do you want to crack the case with <strong>${suspectName}</strong>?`;
+    
+    btnCancel.classList.remove("hidden");
+    btnCrack.classList.remove("hidden");
+    btnCamera.classList.add("hidden");
+    btnNext.classList.add("hidden");
+
+    btnCancel.onclick = () => {
+        modal.classList.add("hidden");
+        selectedSuspectId = null;
+        allCards.forEach(c => c.classList.remove("selected"));
+    };
+
+    btnCrack.onclick = () => {
+        // Switch to selfie prompt
+        title.innerText = "Selfie Time! 📸";
+        title.style.color = "#38bdf8";
+        text.innerHTML = `Go find <strong>${suspectName}</strong> and take a selfie with them to prove it!`;
+
+        btnCancel.classList.add("hidden");
+        btnCrack.classList.add("hidden");
+        btnCamera.classList.remove("hidden");
+
+        btnCamera.onclick = () => {
+            openCamera();
+        };
+    };
+
+    modal.classList.remove("hidden");
+}
+
+let currentStream = null;
+
+window.openCamera = async function() {
+    document.getElementById("cameraModal").classList.remove("hidden");
+    const video = document.getElementById("cameraVideo");
+    try {
+        currentStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" } 
+        });
+        video.srcObject = currentStream;
+    } catch (err) {
+        console.error("Camera access denied", err);
+        alert("Camera access is required to take a selfie. Please grant permissions.");
+        closeCamera();
+    }
+}
+
+window.closeCamera = function() {
+    document.getElementById("cameraModal").classList.add("hidden");
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+}
+
+window.takeSnapshot = function() {
+    const video = document.getElementById("cameraVideo");
+    const canvas = document.getElementById("cameraCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    canvas.toBlob((blob) => {
+        closeCamera();
+        const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+        processGuessAndSelfie(file);
+    }, "image/jpeg", 0.9);
+}
+
+window.processGuessAndSelfie = async function(file) {
+    if (!file) return;
+
+    const modal = document.getElementById("resultModal");
+    const title = document.getElementById("resultModalTitle");
+    const text = document.getElementById("resultModalText");
+    const btnCamera = document.getElementById("btnCamera");
+    const btnNext = document.getElementById("btnNext");
     
     title.innerText = "Analyzing...";
     title.style.color = "#fbbf24";
-    text.innerText = "Checking your guess...";
-    btn.classList.add("hidden");
-    modal.classList.remove("hidden");
+    text.innerText = "Uploading photo and verifying match...";
+    btnCamera.classList.add("hidden");
 
     try {
+        // 1. Submit guess to server
         const guessRes = await fetch("/api/guess", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ playerId, guessedPersonId: selectedSuspectId })
         });
         const guessResult = await guessRes.json();
-        
+
         if (!guessResult.success && guessResult.isCorrect === undefined) {
             alert(guessResult.error || "Attempt failed.");
-            modal.classList.add("hidden");
+            closeResultModal();
             return;
         }
 
-        if (guessResult.isCorrect) {
-            title.innerText = "Correct! 🎉";
-            title.style.color = "#10b981"; // Green
-            text.innerText = `You correctly identified ${guessResult.targetName} and gained ${guessResult.scoreDelta} points! Now take a selfie with them to unlock the next case!`;
-            
-            btn.innerText = "TAKE SELFIE";
-            btn.style.background = "linear-gradient(90deg, #10b981, #059669)";
-            btn.onclick = () => { document.getElementById("selfieInput").click(); };
-            btn.classList.remove("hidden");
-        } else {
-            title.innerText = "Wrong! ❌";
-            title.style.color = "#ef4444"; // Red
-            text.innerText = `That was actually ${guessResult.guessedName}, not the target! You lost 30 points. Try again!`;
-            
-            btn.innerText = "TRY AGAIN";
-            btn.style.background = "linear-gradient(90deg, #ef4444, #b91c1c)";
-            btn.onclick = () => { closeResultModal(); };
-            btn.classList.remove("hidden");
-            
-            selectedSuspectId = null;
-            const submitBtn = document.getElementById("submitMatchBtn");
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.classList.remove("show");
-            }
-            renderSuspectGrid();
-            loadCards(); // refresh points
-        }
-    } catch (e) {
-        console.error("Match failed:", e);
-        alert("An error occurred during submission.");
-        modal.classList.add("hidden");
-    }
-}
-
-window.processGuessAndSelfie = async function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const modal = document.getElementById("resultModal");
-    const title = document.getElementById("resultModalTitle");
-    const text = document.getElementById("resultModalText");
-    const btn = document.getElementById("resultNextBtn");
-    
-    title.innerText = "Uploading...";
-    title.style.color = "#fbbf24";
-    text.innerText = "Uploading your selfie...";
-    btn.classList.add("hidden");
-    modal.classList.remove("hidden");
-
-    try {
+        // 2. Upload selfie
         const formData = new FormData();
         formData.append("playerId", playerId);
         formData.append("photo", file);
@@ -316,35 +362,36 @@ window.processGuessAndSelfie = async function(event) {
         const selfieResult = await selfieRes.json();
 
         if (selfieResult.success || selfieResult.ok) {
-            document.getElementById("selfieInput").value = "";
             
-            title.innerText = "Selfie Uploaded! 📸";
-            title.style.color = "#10b981";
-            text.innerText = `Great photo! Loading your next case...`;
-            
-            btn.innerText = "CONTINUE";
-            btn.style.background = "linear-gradient(90deg, #10b981, #059669)";
-            btn.onclick = () => { closeResultModal(); };
-            btn.classList.remove("hidden");
-            
-            selectedSuspectId = null;
-            const submitBtn = document.getElementById("submitMatchBtn");
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.classList.remove("show");
+            if (guessResult.isCorrect) {
+                title.innerText = "Correct! 🎉";
+                title.style.color = "#10b981"; // Green
+                text.innerText = `You correctly identified ${guessResult.targetName} and gained ${guessResult.scoreDelta} points! Moving to next case...`;
+            } else {
+                title.innerText = "Wrong! ❌";
+                title.style.color = "#ef4444"; // Red
+                text.innerText = `That was actually ${guessResult.guessedName}, not the target! You lost 30 points. Try this case again!`;
             }
-            renderSuspectGrid();
-            loadCards(); 
+
+            btnNext.innerText = "CONTINUE";
+            btnNext.onclick = () => {
+                closeResultModal();
+                selectedSuspectId = null;
+                renderSuspectGrid();
+                loadCards(); 
+            };
+            btnNext.classList.remove("hidden");
         } else {
             alert(selfieResult.error || "Upload failed");
-            modal.classList.add("hidden");
+            closeResultModal();
         }
     } catch (e) {
         console.error("Upload failed:", e);
-        alert("An error occurred during selfie upload.");
-        modal.classList.add("hidden");
+        alert("An error occurred during verification.");
+        closeResultModal();
     }
 }
+
 
 window.closeResultModal = function() {
     document.getElementById("resultModal").classList.add("hidden");
