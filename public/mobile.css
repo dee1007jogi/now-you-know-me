@@ -575,4 +575,193 @@
         z-index: 150 !important;
     }
 
+    /* Collapsible Navigation Sidebar for Mobile */
+    .app-layout {
+        position: relative !important;
+        flex-direction: row !important;
+    }
+
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        width: 280px !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 5000 !important;
+        box-shadow: 20px 0 50px rgba(0, 0, 0, 0.6) !important;
+        background: var(--navy-dark) !important;
+        display: flex !important;
+    }
+
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+
+    /* Sidebar Overlay to close it when touching outside */
+    .sidebar-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(4px) !important;
+        z-index: 4999 !important;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Toggle button on mobile */
+    .sidebar-toggle-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 12px !important;
+        color: white !important;
+        font-size: 1.4rem !important;
+        width: 42px !important;
+        height: 42px !important;
+        cursor: pointer;
+        margin-right: 12px;
+        transition: background 0.2s;
+        outline: none;
+    }
+
+    .sidebar-toggle-btn:active {
+        background: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .main-content {
+        width: 100% !important;
+        flex: 1 !important;
+    }
+
+    .main-content header {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 10px 16px !important;
+        height: 60px !important;
+    }
+
+    .header-title-group h1 {
+        font-size: 0.95rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 110px !important;
+    }
+
+    .header-badge {
+        font-size: 0.55rem !important;
+        padding: 3px 6px !important;
+    }
+
+    /* Mobile header session badge */
+    .mobile-session-badge {
+        display: flex !important;
+    }
+
+
+    /* Grid layout refactoring overrides for mobile widths */
+    .lobby-split-grid, .admin-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    .round-control-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .round-control-buttons button {
+        flex: 1 !important;
+    }
+
+    .trigger-control-buttons {
+        display: flex !important;
+        flex-direction: column !important; /* Stack vertically on mobile screen width */
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    /* Metric cards 2x2 grid */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 15px !important;
+    }
+    .metric-card {
+        padding: 12px !important;
+        border-radius: 16px !important;
+    }
+    .metric-card h4 {
+        font-size: 0.65rem !important;
+        margin-bottom: 4px !important;
+    }
+    .metric-value {
+        font-size: 1.3rem !important;
+    }
+
+    /* Overall container padding */
+    .views-container {
+        padding: 12px 10px !important;
+    }
+    .glass-card {
+        padding: 14px 12px !important;
+        border-radius: 16px !important;
+    }
+
+    /* Controls padding */
+    .control-row {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    .control-group {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 12px 14px !important;
+        gap: 10px !important;
+    }
+    .control-group h5 {
+        margin-bottom: 6px !important;
+    }
+    .btn-action {
+        padding: 10px 12px !important;
+        font-size: 0.8rem !important;
+    }
+    .trigger-btn {
+        width: 100% !important;
+        padding: 10px 12px !important;
+        font-size: 0.8rem !important;
+        justify-content: center !important;
+    }
+
+    /* Leaderboard Tab (3-Column Split) stacked on mobile */
+    .workspace-grid {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+        gap: 15px !important;
+    }
+    .grid-col {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 400px !important;
+        padding: 15px !important;
+        border-radius: 16px !important;
+    }
+    .col-leaderboard, .col-dossier, .col-selfies {
+        width: 100% !important;
+    }
+
 }

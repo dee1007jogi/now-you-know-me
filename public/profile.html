@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Profile – Now You Know Me</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/mobile.css">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-blue: #38bdf8;
+            --neon-cyan: #22d3ee;
+            --gold-bright: #fbbf24;
+            --radius-card: 24px;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 50%, #060913 0%, #010204 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glowing Corner Orbs */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.05) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .profile-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(56, 189, 248, 0.05);
+            max-width: 720px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .avatar-wrap {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 3px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+            background: #020617;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .agent-meta h1 {
+            font-size: 2.2rem;
+            font-weight: 950;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .interaction-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .stat-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            border-color: rgba(56, 189, 248, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .stat-box h6 {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 0 0 8px 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 950;
+            font-family: 'Cinzel', serif;
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            display: block;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            color: var(--gold-bright);
+            margin: 0 0 15px 0;
+            font-size: 1.05rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+
+        .clues-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .clue-item {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .clue-label {
+            color: var(--neon-cyan);
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clue-val {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Selfies Grid */
+        .selfies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 40px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .selfie-card {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: #000;
+        }
+
+        .selfie-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .selfie-vs {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 6px;
+            font-size: 0.65rem;
+            text-align: center;
+            font-weight: 800;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Buttons and Navigation */
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--neon-blue), #4f46e5);
+            color: white;
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            max-width: 180px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .profile-card {
+                padding: 25px;
+            }
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .clues-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-actions {
+                flex-direction: column;
+            }
+            .btn-logout {
+                max-width: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <!-- Header -->
+        <div class="profile-header">
+            <div class="avatar-wrap">
+                <img id="avatarImg" src="/assets/detective_sketch.png" class="avatar-img" alt="Avatar">
+            </div>
+            <div class="agent-meta">
+                <h1 id="agentName">Agent Name</h1>
+                <span id="interactionBadge" class="interaction-badge">Fresh Recruit 🕵️</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h6>Total Score</h6>
+                <span id="scoreVal" class="stat-val" style="color: var(--neon-blue);">0</span>
+                <span class="stat-sub">pts earned</span>
+            </div>
+            <div class="stat-box">
+                <h6>Accuracy & Speed</h6>
+                <span id="speedVal" class="stat-val" style="color: var(--gold-bright);">--s</span>
+                <span id="accuracySub" class="stat-sub">--% correct match rate</span>
+            </div>
+            <div class="stat-box">
+                <h6>Wrong Guesses</h6>
+                <span id="wrongVal" class="stat-val" style="color: #ef4444;">0</span>
+                <span id="penaltySub" class="stat-sub">0 pts deducted</span>
+            </div>
+        </div>
+
+        <!-- Clues -->
+        <h3 class="section-title">🔍 Clues & Answers</h3>
+        <div id="cluesContainer" class="clues-grid">
+            <!-- Populated dynamically -->
+        </div>
+
+        <!-- Selfies -->
+        <h3 class="section-title">📸 Captured Selfies</h3>
+        <div id="selfiesContainer" class="selfies-grid">
+            <!-- Populated dynamically -->
+        </div>
+
+        <!-- Navigation Actions -->
+        <div class="nav-actions">
+            <button class="btn-action btn-back" onclick="location.href='/player'">🎮 Back to Operation</button>
+            <button class="btn-action btn-logout" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const playerId = localStorage.getItem("playerId");
+        // Strict Access Control: Redirect to home page if not logged in
+        if (!playerId) {
+            alert("Unauthorized! Redirecting to login...");
+            location.href = "/";
+        }
+
+        const socket = io();
+        let appState = null;
+        let currentUser = null;
+
+        // Rank level calculator
+        function getInteractionLevel(p, selfiesCount) {
+            const score = p.score || 0;
+            const speed = p.avgCorrectSec;
+            const correct = p.correct || 0;
+            
+            if (score >= 400 || (correct >= 4 && speed !== null && speed <= 25)) {
+                return {
+                    text: "Elite Investigator 🎖️",
+                    color: "#c084fc",
+                    bg: "rgba(192, 132, 252, 0.15)",
+                    border: "1px solid rgba(192, 132, 252, 0.3)"
+                };
+            } else if (selfiesCount >= 3 || correct >= 3) {
+                return {
+                    text: "Social Matchmaker 🤝",
+                    color: "#22d3ee",
+                    bg: "rgba(34, 211, 238, 0.15)",
+                    border: "1px solid rgba(34, 211, 238, 0.3)"
+                };
+            } else if (speed !== null && speed <= 20) {
+                return {
+                    text: "Speedy Detective ⚡",
+                    color: "#f59e0b",
+                    bg: "rgba(245, 158, 11, 0.15)",
+                    border: "1px solid rgba(245, 158, 11, 0.3)"
+                };
+            } else if (correct > 0) {
+                return {
+                    text: "Steady Observer 🔍",
+                    color: "#10b981",
+                    bg: "rgba(16, 185, 129, 0.15)",
+                    border: "1px solid rgba(16, 185, 129, 0.3)"
+                };
+            } else {
+                return {
+                    text: "Fresh Recruit 🕵️",
+                    color: "#94a3b8",
+                    bg: "rgba(148, 163, 184, 0.15)",
+                    border: "1px solid rgba(148, 163, 184, 0.3)"
+                };
+            }
+        }
+
+        socket.on("connect", () => {
+            console.log("Connected to state server.");
+        });
+
+        socket.on("state", (state) => {
+            appState = state;
+            currentUser = state.leaderboard.find(p => p.id === playerId);
+            
+            // If they are no longer in the active DB leaderboard, redirect them out
+            if (!currentUser) {
+                console.warn("User not found in leaderboard state.");
+                return;
+            }
+
+            renderProfile();
+        });
+
+        function renderProfile() {
+            if (!currentUser) return;
+            const p = currentUser;
+
+            const playerSelfies = appState.selfies ? appState.selfies.filter(s => s.playerId === playerId) : [];
+
+            // Identity
+            document.getElementById("agentName").innerText = p.name || "Anonymous Investigator";
+            document.getElementById("avatarImg").src = p.photoUrl || "/assets/detective_sketch.png";
+
+            // Interaction Badge
+            const level = getInteractionLevel(p, playerSelfies.length);
+            const badge = document.getElementById("interactionBadge");
+            badge.innerText = level.text;
+            badge.style.color = level.color;
+            badge.style.background = level.bg;
+            badge.style.border = level.border;
+
+            // Score & Stats
+            document.getElementById("scoreVal").innerText = p.score || 0;
+            document.getElementById("wrongVal").innerText = p.wrong || 0;
+            document.getElementById("penaltySub").innerText = `${(p.wrong || 0) * -30} pts penalty`;
+
+            const speedText = p.avgCorrectSec !== null && p.avgCorrectSec !== undefined ? `${p.avgCorrectSec}s avg` : "--s";
+            document.getElementById("speedVal").innerText = speedText;
+            document.getElementById("accuracySub").innerText = `${p.accuracy !== undefined ? p.accuracy : 0}% correct guess rate`;
+
+            // Clues
+            const cluesContainer = document.getElementById("cluesContainer");
+            cluesContainer.innerHTML = "";
+            if (p.answers) {
+                const labelsMap = {
+                    workStyle: "Work Style",
+                    teamRole: "Team Role",
+                    meetingPower: "Meeting Superpower",
+                    breakStyle: "Ideal Break",
+                    updatesVia: "Updates via",
+                    recharge: "Recharge Method",
+                    morningFuel: "Morning Fuel",
+                    workspaceQuirk: "Workspace Quirk",
+                    weekendRoutine: "Weekend Routine",
+                    surprisingSkill: "Surprising Skill"
+                };
+                Object.keys(p.answers).forEach(key => {
+                    const label = labelsMap[key] || key;
+                    const val = p.answers[key];
+                    const item = document.createElement("div");
+                    item.className = "clue-item";
+                    item.innerHTML = `
+                        <span class="clue-label">${label}</span>
+                        <span class="clue-val">${val}</span>
+                    `;
+                    cluesContainer.appendChild(item);
+                });
+            } else {
+                cluesContainer.innerHTML = `<div style="grid-column:1/-1; opacity:0.4; text-align:center; padding:15px; font-weight:700;">No answers submitted.</div>`;
+            }
+
+            // Selfies
+            const selfiesContainer = document.getElementById("selfiesContainer");
+            selfiesContainer.innerHTML = "";
+            if (playerSelfies.length > 0) {
+                playerSelfies.forEach(s => {
+                    const scard = document.createElement("div");
+                    scard.className = "selfie-card";
+                    scard.innerHTML = `
+                        <img src="${s.photoUrl}" class="selfie-img" alt="Selfie">
+                        <div class="selfie-vs">vs ${s.guessedName}</div>
+                    `;
+                    selfiesContainer.appendChild(scard);
+                });
+            } else {
+                selfiesContainer.innerHTML = `<div style="grid-column:1/-1; opacity:0.4; text-align:center; padding:15px; font-weight:700; color:white;">No captured selfies.</div>`;
+            }
+        }
+
+        document.getElementById("logoutBtn").onclick = () => {
+            if (confirm("Are you sure you want to log out of the operation?")) {
+                localStorage.clear();
+                location.href = "/";
+            }
+        };
+    </script>
+</body>
+</html>

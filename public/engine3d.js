@@ -53,10 +53,19 @@ class WebGLEngine {
         this.interactables = [];
 
         // Bind event listeners
+        this.lastProcessedTime = 0;
         window.addEventListener('resize', this.onWindowResize.bind(this));
         window.addEventListener('mousemove', this.onMouseMove.bind(this));
-        window.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
-        window.addEventListener('mousedown', this.onClick.bind(this));
+        
+        window.addEventListener('touchstart', (e) => {
+            this.lastProcessedTime = Date.now();
+            this.onTouchStart(e);
+        }, { passive: false });
+
+        window.addEventListener('mousedown', (e) => {
+            if (Date.now() - this.lastProcessedTime < 600) return;
+            this.onClick(e);
+        });
 
         // Start render loop
         this.animate = this.animate.bind(this);

@@ -237,7 +237,67 @@
 </head>
 
 <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/mobile3d.js"></script>
+    <script src="/engine3d.js"></script>
+
+    <!-- 3D Background Container -->
+    <div id="webgl-container" style="position:fixed; inset:0; z-index:1; pointer-events:none;"></div>
+
+    <!-- TEXT INPUT OVERLAY -->
+    <div id="textInputWrap" class="hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 24px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); padding: 50px 60px; border-radius: 32px; border: 2px solid rgba(56, 189, 248, 0.4); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(56, 189, 248, 0.2); pointer-events: none;">
+        <h2 style="font-size: 2.2rem; color: #38bdf8; margin: 0; text-shadow: 0 2px 10px rgba(56, 189, 248, 0.5);">What is your surprising skill?</h2>
+        <input type="text" id="surprisingSkill" class="glow-input neon-border" placeholder="Enter your skill... ✨" style="text-align: center !important; font-size: 1.8rem !important; padding: 20px 40px !important; width: 500px; max-width: 90vw; pointer-events: auto; background: rgba(0,0,0,0.5); border: 2px solid #38bdf8; color: white; border-radius: 16px; outline: none;" />
+        <button id="submitAnswersBtn" class="btn btn-gradient shine-effect" style="font-size: 1.5rem; padding: 16px 50px; pointer-events: auto; background: linear-gradient(135deg, #0ea5e9, #2563eb); border: none; color: white; border-radius: 999px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(14, 165, 233, 0.6)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(14, 165, 233, 0.4)';">Submit Answer ✨</button>
+    </div>
+
+    <!-- LIVE STAGE UI -->
+    <div id="liveStage" class="hidden" style="position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+        
+        <!-- TOP LEFT INSTRUCTIONS -->
+        <div style="position: absolute; top: 40px; left: 40px; text-align: left; pointer-events: auto;">
+            <h1 style="color: #60a5fa; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; font-weight: bold; text-shadow: 0 0 15px rgba(96, 165, 250, 0.6); font-family: Georgia, serif;">MATCH THE MYSTERY!</h1>
+            <p style="color: #cbd5e1; font-size: 1rem; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;">SELECT A MASCOT THAT MATCHES THE CLUES.</p>
+        </div>
+
+        <div id="scorePill" class="hidden" style="position: absolute; top: 40px; right: 40px; background: rgba(120, 80, 40, 0.7); border: 1px solid rgba(255,255,255,0.2); padding: 12px 24px; border-radius: 30px; color: #fff; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">YOUR SCORE <span id="pillValue" style="color: #fbbf24; margin-left: 8px;">0</span></div>
+        
+        <div style="position: relative; width: 90%; max-width: 1100px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <button id="prevCardBtn" class="btn btn-gradient" style="font-size: 2rem; padding: 10px 20px; border-radius: 50%; pointer-events: auto;">&lt;</button>
+            <div id="cardFocusContainer" style="width: 900px; height: 550px; overflow: hidden; position: relative; pointer-events: auto;">
+                <div id="bestiaryRow" style="display: flex; transition: transform 0.5s ease-in-out; height: 100%;"></div>
+            </div>
+            <button id="nextCardBtn" class="btn btn-gradient" style="font-size: 2rem; padding: 10px 20px; border-radius: 50%; pointer-events: auto;">&gt;</button>
+        </div>
+        
+        <div id="scanOverlay" class="hidden" style="position: absolute; inset: 0; pointer-events: auto;"></div>
+        <div id="cooldownOverlay" class="hidden" style="position: absolute; inset: 0; pointer-events: none; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; font-weight: bold; text-shadow: 0 0 20px #0ea5e9;"><span id="cooldownTimer"></span></div>
+        
+        <!-- CONFIRM MODAL -->
+        <div id="confirmModal" class="hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15,23,42,0.95); padding: 40px; border-radius: 20px; border: 2px solid #0ea5e9; display: flex; flex-direction: column; align-items: center; gap: 20px; pointer-events: auto; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+            <h2 style="color: white; margin: 0;">Is this their card?</h2>
+            <img id="modalPhoto" src="" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #38bdf8;">
+            <span id="modalName" style="color: #38bdf8; font-size: 1.5rem; font-weight: bold;"></span>
+            <div style="display: flex; gap: 20px;">
+                <button onclick="document.getElementById('confirmModal').classList.add('hidden')" class="btn" style="background: #334155; color: white;">Cancel</button>
+                <button id="modalConfirm" class="btn btn-gradient shine-effect">Yes, Match!</button>
+            </div>
+        </div>
+        <div id="pointsPopup" style="position: absolute; pointer-events: none; font-size: 3rem; font-weight: bold; color: #10b981; text-shadow: 0 0 10px rgba(0,0,0,0.8); opacity: 0; transform: translateY(0);"></div>
+    </div>
+
+    <!-- ENDED STAGE UI -->
+    <div id="endedStage" class="hidden" style="position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(15,23,42,0.9); pointer-events: none;">
+        <h1 style="color: #0ea5e9; font-size: 4rem; text-shadow: 0 0 20px #0ea5e9;">Game Over!</h1>
+        <div id="finalScore" style="color: white; font-size: 2.5rem; text-align: center; margin-top: 20px;"></div>
+    </div>
+
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/game_logic.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cannon@0.18.0/build/cannon.min.js"></script>
@@ -293,20 +353,11 @@
         "></div>
     </div>
 
-    <div id="webgl-container" style="position:fixed; inset:0; z-index:-1; pointer-events:none;"></div>
 
-    <!-- ENTRANCE VIDEO OVERLAY -->
-    <div id="videoContainer"
-        style="position:fixed; inset:0; z-index: 3000; background:black; transition: opacity 1s ease;">
-        <video id="entranceVideo" src="/assets/enternce.mp4" autoplay muted playsinline
-            style="width:100%; height:100%; object-fit:cover;"></video>
-        <button id="skipVideoBtn" class="skip-btn" style="position:absolute; top:24px; right:24px; z-index:3010;">Skip
-            ⏭</button>
-    </div>
 
     <!-- REAL JOIN SCREEN -->
     <div id="joinScreen"
-        style="display:none; opacity:0; transition: opacity 0.8s ease-in, transform 0.8s ease-out; position: absolute; inset:0; z-index:10; padding-left: 10vw; align-items: center; justify-content: flex-start;">
+        style="display:flex; opacity:1; transition: opacity 0.8s ease-in, transform 0.8s ease-out; position: absolute; inset:0; z-index:10; padding-left: 10vw; align-items: center; justify-content: flex-start;">
 
         <div class="login-panel" style="width: 100%; max-width: 450px; position:relative; z-index: 20;">
             <div class="logo-text-container" style="text-align: center; margin-bottom: 40px; position: relative;">
@@ -339,63 +390,18 @@
         </div>
     </div>
 
-    <!-- SELFIE CAPTURE SCREEN -->
-    <div id="selfieScreen"
-        style="display:none; opacity:0; position:fixed; inset:0; z-index:100; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.15);">
-        <div class="selfie-header" style="text-align:center; margin-bottom:30px;">
-            <h1
-                style="font-size:3.5rem; font-weight:900; color:#fef08a; text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 20px rgba(254, 240, 138, 0.4); margin:0; font-family: 'Segoe UI', sans-serif;">
-                Snap Your Best Selfie!</h1>
-            <p style="color:white; font-size:1.4rem; font-weight:600; opacity:0.9; margin-top: 10px;">Ready for the
-                team? Let's capture that spark!</p>
-        </div>
-
-        <div class="selfie-frame-container">
-            <!-- Focus Brackets -->
-            <div class="focus-bracket bracket-tl"></div>
-            <div class="focus-bracket bracket-tr"></div>
-            <div class="focus-bracket bracket-bl"></div>
-            <div class="focus-bracket bracket-br"></div>
-
-            <video id="selfieVideo" autoplay playsinline
-                style="width:100%; height:100%; object-fit:cover; filter: contrast(1.1) brightness(1.1);"></video>
-            <canvas id="selfieCanvas" style="display:none; width:100%; height:100%; object-fit:cover;"></canvas>
-            <div class="heart-mask">
-                <svg class="heart-glow" viewBox="0 0 32 29.6">
-                    <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
-                    c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z" fill="none" stroke="#38bdf8" stroke-width="2" />
-                </svg>
-            </div>
-        </div>
-
-        <div class="selfie-controls"
-            style="margin-top:40px; display:flex; align-items:center; justify-content:center; gap:30px; width:100%; max-width:400px;">
-            <div id="captureGroup" style="display:flex; align-items:center; gap:30px;">
-                <div style="width:60px;"></div> <!-- Spacer -->
-                <button id="shutterBtn" class="capture-btn" title="Capture!"></button>
-                <div id="galleryBtn" class="btn"
-                    style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; padding:10px; border-radius:50%; width:60px; height:60px; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer;">
-                    📁</div>
-            </div>
-            <div id="confirmGroup" style="display:none; gap:20px;">
-                <button id="retakeBtn" class="btn"
-                    style="background:rgba(255,255,255,0.1); border:2px solid white; color:white; padding:12px 30px; border-radius:12px; font-weight:800;">Retake</button>
-                <button id="useBtn" class="btn btn-gradient"
-                    style="padding:12px 40px; border-radius:12px; font-weight:800;">Use this!</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Initialize WebGL Engine safely
         let engine;
         try {
             engine = new WebGLEngine("webgl-container");
+            window.engine = engine;
         } catch (e) {
             console.warn("WebGL not supported or error:", e);
         }
 
         // Add Interactive GSAP Hovers to HTML Elements
+        addGSAPUI(".btn");
         function addGSAPUI(selector) {
             if (!window.gsap) return;
             document.querySelectorAll(selector).forEach(el => {
@@ -405,42 +411,7 @@
             });
         }
 
-        // ENTRANCE VIDEO & LOGIC
-        const videoContainer = document.getElementById("videoContainer");
-        const entranceVideo = document.getElementById("entranceVideo");
-        const skipBtn = document.getElementById("skipVideoBtn");
-        const joinScreen = document.getElementById("joinScreen");
-
-        let hasSkipped = false;
-
-        function showJoinScreen() {
-            if (hasSkipped) return;
-            hasSkipped = true;
-
-            videoContainer.style.opacity = "0";
-            setTimeout(() => {
-                videoContainer.style.display = "none";
-                entranceVideo.pause();
-                entranceVideo.src = "";
-
-                joinScreen.style.display = "flex";
-                setTimeout(() => {
-                    joinScreen.style.opacity = "1";
-                    joinScreen.style.transform = "scale(1)";
-                }, 50);
-                document.getElementById("name").focus();
-                addGSAPUI(".btn");
-            }, 800);
-        }
-
-        skipBtn.onclick = showJoinScreen;
-        entranceVideo.onended = showJoinScreen;
-
-        // Ensure video plays
-        entranceVideo.play().catch(e => {
-            console.log("Autoplay blocked, showing join screen");
-            showJoinScreen();
-        });
+        
 
         // Create and style tooltip globally
         const tooltip = document.createElement("div");
@@ -615,7 +586,7 @@
                 // Architectural Pillars
                 const pillarGeo = new THREE.BoxGeometry(2, 25, 2);
                 const pillarMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.3 });
-                [-45, -15, 15, 45].forEach(x => {
+                [-45, -32, 32, 45].forEach(x => {
                     const pill = new THREE.Mesh(pillarGeo, pillarMat);
                     pill.position.set(x, 7.5, -2);
                     engine.scene.add(pill);
@@ -660,11 +631,32 @@
                     const mon = new THREE.Mesh(monGeo, monMat);
                     mon.position.set(0, 6.3, -1); // Adjusted for taller desk
                     group.add(mon);
+
+                    // Chair
+                    const chairGeo = new THREE.BoxGeometry(2, 0.4, 2);
+                    const chairMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+                    const seat = new THREE.Mesh(chairGeo, chairMat);
+                    seat.position.set(0, 2.5, 2.5); // Placed slightly behind the desk
+                    group.add(seat);
+
+                    const backGeo = new THREE.BoxGeometry(2, 2.5, 0.4);
+                    const back = new THREE.Mesh(backGeo, chairMat);
+                    back.position.set(0, 4.0, 3.3);
+                    group.add(back);
+
+                    const chairLegGeo = new THREE.CylinderGeometry(0.1, 0.1, 2.5);
+                    const chairLeg = new THREE.Mesh(chairLegGeo, legMat); // Reuse desk leg material
+                    chairLeg.position.set(0, 1.25, 2.5);
+                    group.add(chairLeg);
+
                     engine.scene.add(group);
                 }
 
                 // Scatter some desks in the background rows
                 for (let x = -50; x <= 60; x += 15) {
+                    // Leave a clearing for the question board and mascots (centered around x=0)
+                    if (Math.abs(x - 0) < 15) continue;
+
                     createDesk(x, 0);
                     // Add second row further back
                     if (Math.abs(x - 5) > 10) createDesk(x, -3);
@@ -822,191 +814,7 @@
             }
         }
 
-        // SELFIE PHASE LOGIC
-        const selfieScreen = document.getElementById("selfieScreen");
-        const selfieVideo = document.getElementById("selfieVideo");
-        const selfieCanvas = document.getElementById("selfieCanvas");
-        const shutterBtn = document.getElementById("shutterBtn");
-        const retakeBtn = document.getElementById("retakeBtn");
-        const useBtn = document.getElementById("useBtn");
-        const captureGroup = document.getElementById("captureGroup");
-        const confirmGroup = document.getElementById("confirmGroup");
 
-        let stream = null;
-
-        async function startSelfiePhase(mascots) {
-            // 1. Move Original Bunny and Owl out, bring Fox and SELFIE BUNNY to HOST positions
-            const { owl, bunny, fox, selfie_bunny } = mascots;
-            const mobileConf = window.Mobile3D.getSelfiePhaseConfig();
-
-            // Bunny and Owl exit stage
-            gsap.to(bunny.model.position, { x: mobileConf.bunnyExitX, duration: 1.5, ease: "power2.in" });
-            gsap.to(owl.model.position, { x: mobileConf.owlExitX, duration: 1.5, ease: "power2.in" });
-
-            // FOX (Left Host)
-            gsap.to(fox.model.position, { x: mobileConf.foxX, y: mobileConf.foxY, z: mobileConf.foxZ, duration: 2, ease: "elastic.out(1, 0.5)" });
-            gsap.to(fox.model.rotation, { y: 0.8, duration: 1 });
-            gsap.to(fox.model.scale, { x: mobileConf.foxScale, y: mobileConf.foxScale, z: mobileConf.foxScale, duration: 1 });
-
-            // SELFIE BUNNY (Right Host) - Taking the Owl's place
-            selfie_bunny.model.position.set(mobileConf.selfieBunnyX + 10, -1, 45); // Start from side
-            gsap.to(selfie_bunny.model.position, { x: mobileConf.selfieBunnyX, y: mobileConf.selfieBunnyY, z: mobileConf.selfieBunnyZ, duration: 2, ease: "elastic.out(1.1, 0.6)" });
-            gsap.to(selfie_bunny.model.rotation, { y: -0.8, duration: 1 });
-            gsap.to(selfie_bunny.model.scale, { x: mobileConf.selfieBunnyScale, y: mobileConf.selfieBunnyScale, z: mobileConf.selfieBunnyScale, duration: 1 });
-
-            // 2. Fade in Selfie UI & Pop 3D to front
-            document.getElementById("webgl-container").classList.add("selfie-mode");
-            selfieScreen.style.display = "flex";
-            gsap.to(selfieScreen, { opacity: 1, duration: 1 });
-
-            // 3. Start Camera
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 } });
-                selfieVideo.srcObject = stream;
-                selfieVideo.play();
-            } catch (err) {
-                console.error("Camera error:", err);
-                alert("Please allow camera access to join the game!");
-            }
-
-            // Fox greets, Owl waves
-            if (window.lipSyncManager) window.lipSyncManager.playAndSync(fox.model, fox.data.audio);
-            showDialogue(fox.model, "🦊 Playful Fox", "Look over here! 📸 Professor Hoot and I are ready when you are!", 4.0, 'right');
-
-            // Subtle hover for owl
-            gsap.to(owl.model.position, { y: "+=0.2", duration: 1.5, yoyo: true, repeat: -1, ease: "sine.inOut" });
-        }
-
-        shutterBtn.onclick = () => {
-            const context = selfieCanvas.getContext("2d");
-            selfieCanvas.width = selfieVideo.videoWidth;
-            selfieCanvas.height = selfieVideo.videoHeight;
-            context.drawImage(selfieVideo, 0, 0, selfieCanvas.width, selfieCanvas.height);
-
-            selfieVideo.style.display = "none";
-            selfieCanvas.style.display = "block";
-            captureGroup.style.display = "none";
-            confirmGroup.style.display = "flex";
-
-            const fox = window._mascots['fox'];
-            gsap.to(fox.model.position, { y: fox.data.pos.y + 0.5, duration: 0.2, yoyo: true, repeat: 1 });
-            showDialogue(fox.model, "🦊 Playful Fox", "Looking sharp! Is this the one?", 3.0, 'right');
-        };
-
-        retakeBtn.onclick = () => {
-            selfieVideo.style.display = "block";
-            selfieCanvas.style.display = "none";
-            captureGroup.style.display = "flex";
-            confirmGroup.style.display = "none";
-        };
-
-        useBtn.onclick = async () => {
-            console.log("Use button clicked!");
-            const fox = window._mascots['fox'];
-            const playerId = localStorage.getItem("playerId");
-
-            if (!playerId) {
-                alert("Session expired. Please refresh.");
-                return;
-            }
-
-            if (fox && fox.model) {
-                gsap.to(fox.model.rotation, { y: Math.PI * 2, duration: 1, ease: "power2.inOut" });
-            }
-
-            // Celebration
-            createConfetti();
-            if (window.showDialogue && fox && fox.model) {
-                showDialogue(fox.model, "🦊 Playful Fox", "Perfect! Sending your profile to the cloud... 🚀", 3.0, 'right');
-            }
-
-            // 1. Prepare Photo Blob
-            console.log("Converting canvas to blob...");
-            const blob = await new Promise(resolve => {
-                selfieCanvas.toBlob((b) => {
-                    if (!b) console.warn("Canvas toBlob returned null!");
-                    resolve(b);
-                }, 'image/jpeg', 0.85);
-            });
-
-            if (!blob) {
-                alert("Error capturing photo. Please try Retake.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("playerId", playerId);
-            formData.append("photo", blob, "selfie.jpg");
-
-            // 2. Upload
-            console.log("Uploading to server...");
-            useBtn.innerHTML = "⏳ Uploading...";
-            useBtn.style.pointerEvents = "none";
-
-            try {
-                const res = await fetch("/api/upload-photo", {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!res.ok) {
-                    const errorField = await res.json();
-                    throw new Error(errorField.error || "Upload failed");
-                }
-
-                console.log("Upload successful! Redirecting...");
-                if (window.showDialogue && fox && fox.model) {
-                    showDialogue(fox.model, "🦊 Playful Fox", "You're all set! Now let's answer some clues... 🔍", 2.5, 'right');
-                }
-
-                // 3. Redirect to player page
-                setTimeout(() => {
-                    if (stream) {
-                        try {
-                            stream.getTracks().forEach(track => track.stop());
-                        } catch (e) { }
-                    }
-                    window.location.href = "/player";
-                }, 1500);
-
-            } catch (err) {
-                console.error("Upload error:", err);
-                useBtn.innerHTML = "Retry Upload";
-                useBtn.style.pointerEvents = "auto";
-                if (window.showDialogue && fox && fox.model) {
-                    showDialogue(fox.model, "🦊 Playful Fox", "Oops! Connection glitch. Try hitting the button again!", 3.0, 'right');
-                }
-            }
-        };
-
-        document.getElementById("galleryBtn").onclick = () => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = "image/*";
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const context = selfieCanvas.getContext("2d");
-                            selfieCanvas.width = img.width;
-                            selfieCanvas.height = img.height;
-                            context.drawImage(img, 0, 0);
-
-                            selfieVideo.style.display = "none";
-                            selfieCanvas.style.display = "block";
-                            captureGroup.style.display = "none";
-                            confirmGroup.style.display = "flex";
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-            input.click();
-        };
 
         // REAL JOIN LOGIC UPDATED
         document.getElementById("joinBtn").onclick = async () => {
@@ -1064,7 +872,7 @@
                 });
 
                 // 2. Trigger Selfie Phase
-                startSelfiePhase(window._mascots);
+                if (window.initPlayerGame) window.initPlayerGame();
 
             } catch (err) {
                 console.error("Fetch Error:", err);

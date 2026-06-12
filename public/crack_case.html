@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Match the Mystery! - Now You Know Me</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #e2e8f0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        #header {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 80px;
+            padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #scorePill {
+            background: rgba(120, 80, 40, 0.7);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: auto;
+        }
+
+        /* MAIN CONTAINER */
+        #liveStage {
+            display: flex;
+            gap: 24px;
+            max-width: 1380px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 60px; /* offset for header */
+            z-index: 50;
+        }
+
+        /* Panels */
+        .target-panel, .select-panel {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 28px 22px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            max-height: 700px;
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #facc15;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .clue-item {
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: space-between;
+            font-size: 15.5px;
+        }
+
+        .clue-label { color: #94a3b8; font-weight: 500; }
+        .clue-value { color: #fff; font-weight: 700; text-align: right; }
+
+        /* 3D Card */
+        .card-container {
+            flex: 0 0 40%;
+            max-width: 450px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #scene {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 380 / 530;
+            perspective: 1400px;
+        }
+
+        #card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 18px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.8);
+            cursor: grab;
+            transition: transform 0.2s;
+            transform-style: preserve-3d;
+        }
+
+        /* Suspect Cards */
+        .select-panel-content {
+            overflow-y: auto;
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+
+        .suspect-card {
+            background: rgba(255,255,255,0.95);
+            color: #111;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .suspect-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 25px rgba(249, 166, 0, 0.35);
+        }
+
+        .suspect-card.selected {
+            border: 3px solid #fbbf24;
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.4);
+        }
+
+        .suspect-avatar {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #1e2937;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .suspect-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #d97706, #fbbf24);
+            color: #111;
+            font-weight: 700;
+            font-size: 17px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #475569;
+            color: #94a3b8;
+        }
+
+        .slider-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .slider-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .slider-btn:hover { background: rgba(255,255,255,0.2); }
+        .slider-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            #liveStage { gap: 20px; }
+            .card-container { flex: 0 0 45%; max-width: 350px; }
+        }
+
+        /* Separate Mobile Optimization Code */
+        @media (max-width: 768px) {
+            body { 
+                padding: 15px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: flex-start; 
+                overflow-y: auto; 
+                height: auto; 
+                min-height: 100vh;
+            }
+            #header { 
+                position: relative; 
+                height: auto; 
+                padding: 15px 0; 
+                flex-direction: column; 
+                gap: 15px; 
+                align-items: center; 
+                width: 100%;
+            }
+            #header > div { text-align: center !important; }
+            #header h1 { font-size: 1.6rem !important; text-align: center; width: 100%; }
+            #liveStage {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                margin-top: 10px;
+                width: 100%;
+                max-width: 100%;
+            }
+            .card-container {
+                width: 100%;
+                max-width: 320px; /* Perfectly sized for narrow phones */
+                flex: none;
+                margin: 0 auto;
+            }
+            .select-panel {
+                width: 100%;
+                max-width: 100%;
+                flex: none;
+                max-height: none; /* Flow naturally with page scroll */
+                padding: 20px 15px;
+                border-radius: 16px;
+                box-sizing: border-box;
+            }
+            .select-panel-content {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                overflow-y: visible;
+            }
+            .submit-btn {
+                padding: 18px;
+                font-size: 18px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+                z-index: 1000;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .submit-btn.show {
+                transform: translateY(0);
+            }
+            .select-panel {
+                padding-bottom: 80px; /* Leave space for floating button */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-title { font-size: 22px; margin-bottom: 15px; }
+            .clue-item { 
+                font-size: 14px; 
+                padding: 12px 0; 
+                flex-direction: column; 
+                align-items: center; 
+                gap: 6px; 
+                text-align: center; 
+            }
+            .clue-value { text-align: center; font-size: 15px; }
+            .suspect-card { padding: 10px; gap: 8px; border-radius: 12px; }
+            #timerDisplay { font-size: 1.8rem !important; padding: 8px 15px !important; margin-bottom: 10px; }
+            .card-container { max-width: 280px; }
+            #scorePill { width: 100%; text-align: center; box-sizing: border-box; }
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div style="text-align: left; pointer-events: auto;">
+            <h1 style="color: #60a5fa; font-size: 2rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; font-weight: bold; text-shadow: 0 0 15px rgba(96, 165, 250, 0.6); font-family: Georgia, serif;">MATCH THE MYSTERY!</h1>
+        </div>
+        <div id="scorePill">YOUR SCORE <span id="pillValue" style="color: #fbbf24; margin-left: 8px;">0</span></div>
+    </div>
+
+    <div id="liveStage" class="container">
+
+
+        <!-- CENTER: 3D CARD -->
+        <div class="card-container" style="flex-direction: column; gap: 20px;">
+            <div id="timerDisplay" class="hidden" style="font-size: 2.5rem; color: #fbbf24; font-family: 'Courier New', Courier, monospace; font-weight: bold; background: rgba(15, 23, 42, 0.9); padding: 10px 30px; border-radius: 12px; border: 2px solid #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.5); letter-spacing: 2px; text-shadow: 0 0 10px #fbbf24; text-align: center;">00:00</div>
+            <div id="scene">
+                <div id="card">
+                    <!-- Front -->
+                    <div class="card-face front" style="position:absolute; width:100%; height:100%; background:linear-gradient(135deg, #f8f1e3, #e8d9c0); border:14px solid #111; border-radius:18px; box-sizing:border-box; backface-visibility:hidden;">
+                        <div style="position:relative; width:100%; height:100%; padding:28px; color:#111;">
+                            <div style="position:absolute; top:28px; left:32px; text-align:center; line-height:1;">
+                                <div style="font-family:'Playfair Display',serif; font-size:62px; font-weight:700;">K</div>
+                                <div style="font-size:48px;">♠</div>
+                            </div>
+                            <div style="position:absolute; bottom:28px; right:32px; text-align:center; line-height:1; transform:rotate(180deg);">
+                                <div style="font-family:'Playfair Display',serif; font-size:62px; font-weight:700;">K</div>
+                                <div style="font-size:48px;">♠</div>
+                            </div>
+                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:210px; filter:drop-shadow(6px 10px 8px rgba(0,0,0,0.4));">♠</div>
+                            <div style="position:absolute; bottom:24px; left:50%; transform:translateX(-50%); font-size:13px; letter-spacing:3px; color:rgba(17,17,17,0.7);" id="cardTitleText">CASE FILE #1</div>
+                        </div>
+                    </div>
+                    <!-- Back -->
+                    <div class="card-face back" style="position:absolute; width:100%; height:100%; background:linear-gradient(135deg, #1a2533, #0f1824); border:14px solid #111; border-radius:18px; box-sizing:border-box; backface-visibility:hidden; transform:rotateY(180deg); display:flex; align-items:center; justify-content:center;">
+                        <div style="width:90%; height:90%; background: rgba(15, 23, 42, 0.9); border-radius:12px; display:flex; flex-direction: column; align-items:center; padding: 20px; box-sizing: border-box; overflow-y: auto; border: 1px solid #334155;">
+                            <h2 style="font-size: 1.5rem; color: #38bdf8; margin: 0 0 15px 0; text-transform: uppercase; font-family: 'Playfair Display', serif;">Target Clues</h2>
+                            <ul class="clue-list" id="clueList" style="width: 100%; margin: 0;">
+                                <!-- Clues injected here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: SELECT -->
+        <div class="select-panel">
+            <h2 class="panel-title">Select a Match</h2>
+            
+            <div class="select-panel-content" id="suspectImagesContainer">
+                <!-- Suspect cards injected here automatically -->
+            </div>
+
+            <button class="submit-btn" id="submitMatchBtn" disabled onclick="submitSelectedMatch()">
+                SUBMIT MATCH
+            </button>
+        </div>
+    </div>
+
+    <!-- ENDED STAGE (Results) -->
+    <div id="endedStage" class="hidden" style="position: absolute; inset: 0; z-index: 200; background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div style="padding: 50px; border-radius: 30px; background: rgba(0,0,0,0.5); border: 2px solid #fbbf24;">
+            <h1 style="font-size: 3rem; color: #fbbf24; margin-bottom: 20px;">GAME OVER!</h1>
+            <p style="font-size: 1.5rem; color: white; margin-bottom: 30px;">The mystery is solved.</p>
+            <div id="finalScore" style="font-size: 2.5rem; font-weight: bold; color: #38bdf8;"></div>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="resultModal" class="hidden" style="position: absolute; inset: 0; z-index: 150; background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div style="padding: 40px; border-radius: 20px; background: rgba(30, 41, 59, 0.95); border: 2px solid #38bdf8; max-width: 90%; width: 500px;">
+            <h2 id="resultModalTitle" style="font-size: 2.5rem; margin-bottom: 10px; color: #fbbf24;">Processing...</h2>
+            <p id="resultModalText" style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 30px;">Analyzing your guess and uploading selfie...</p>
+            <button class="submit-btn hidden" id="resultNextBtn" onclick="closeResultModal()" style="background: linear-gradient(90deg, #10b981, #059669);">
+                CONTINUE
+            </button>
+        </div>
+    </div>
+
+    <input type="file" id="selfieInput" accept="image/*" capture="environment" style="display: none;" onchange="processGuessAndSelfie(event)">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/crack_case.js"></script>
+</body>
+</html>
