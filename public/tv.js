@@ -578,6 +578,7 @@ function triggerCinematicFinale(leaderboard) {
       setTimeout(() => {
         const winner = leaderboard[0];
         if (!winner) return;
+        
         const modalName = document.getElementById("winnerModalName");
         if (modalName) modalName.innerText = "CHAMPION: " + winner.name;
         const modalScore = document.getElementById("winnerModalScore");
@@ -593,11 +594,14 @@ function triggerCinematicFinale(leaderboard) {
         if (modal) {
           modal.style.opacity = '1';
           modal.style.pointerEvents = 'auto';
-          modal.style.transform = "translate(-50%, -50%) scale(1)";
+          modal.style.transform = "translate(-50%, -50%) scale(1.2)";
         }
       }, 500);
     }
   });
+
+  // Ensure timeline always plays and fires onComplete
+  sequence.to({}, { duration: 0.1 });
 
   const focusPodium = (rankIndex, duration) => {
     if (!top3[rankIndex]) return;
