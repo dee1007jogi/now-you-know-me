@@ -430,9 +430,14 @@ app.get("/api/people/:playerId", async (req, res) => {
         const g = await getGameState();
         if (g.status !== "live") return res.status(400).json({ error: "Game not live" });
 
-        let people = Array.from(playersMap.values())
-            .filter(x => x.id !== p.id && x.photoUrl)
-            .map(x => ({ id: x.id, name: x.name, photoUrl: x.photoUrl }));
+        let allPlayers = Array.from(playersMap.values());
+        let people = allPlayers
+            .filter(x => x.id !== p.id && x.answers)
+            .map(x => {
+                // Find stable index for the player to map to an asset
+                const index = allPlayers.findIndex(ply => ply.id === x.id);
+                return { id: x.id, name: x.name, photoUrl: `/assets/${(index % 30) + 1}.png` };
+            });
 
         for (let i = people.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -573,7 +578,7 @@ app.post("/api/attempt", async (req, res) => {
         await savePlayer(p);
         emitState();
 
-        res.json({ correct: isCorrect, delta: scoreDelta, score: p.score });
+        res.json({ correct: isCorrect, delta: scoreDelta, score: p.score, wrong: p.wrong });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Attempt failed." });

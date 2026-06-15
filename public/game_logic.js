@@ -562,6 +562,8 @@ socket.on("state", (s) => {
 
     if (currentUserData) {
         document.getElementById("pillValue").innerText = currentUserData.score;
+        const minusEl = document.getElementById("minusValue");
+        if (minusEl) minusEl.innerText = (currentUserData.wrong || 0) * -20;
     }
 
     if (s.status === "lobby") {
@@ -1002,7 +1004,10 @@ if (modalConfirm) modalConfirm.onclick = async () => {
 
             // Immediately update the score display
             if (currentUserData) currentUserData.score = out.score;
+            if (currentUserData) currentUserData.wrong = out.wrong; // Ensure wrong count is updated
             document.getElementById("pillValue").innerText = currentUserData?.score || 0;
+            const minusEl = document.getElementById("minusValue");
+            if (minusEl) minusEl.innerText = (currentUserData?.wrong || 0) * -20;
 
             // Show cooldown after wrong guess
             setTimeout(() => showCooldown(30), 1000);
