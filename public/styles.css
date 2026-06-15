@@ -1228,3 +1228,25 @@ select {
     text-shadow: 0 0 8px rgba(45, 212, 191, 0.4), 1px 1px 2px rgba(2, 6, 23, 0.8);
 }
 
+/* ========================================================================= */
+/* GPU HARDWARE ACCELERATION (60fps Optimization)                            */
+/* ========================================================================= */
+
+.cinematic-title, .cinematic-title span, .logo-text-container {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.login-panel, #confirmModal, #gameRulesOverlay, #speechBubble, #pointsPopup {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+.leaderboard-container, .leaderboard-card, .profile-card, .bestiary-card {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.btn, a, button, .glow-input {
+    backface-visibility: hidden;
+}
