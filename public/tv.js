@@ -574,13 +574,14 @@ function triggerCinematicFinale(leaderboard) {
       orbitControls.enabled = true;
       orbitControls.target.set(0, 4, -10);
 
-      // Trigger Winner Modal after camera pans
+      // Trigger Center Overlay and Winner Modal after camera pans
       setTimeout(() => {
         const winner = leaderboard[0];
         if (!winner) return;
         
+        // Populate Polaroid Card
         const modalName = document.getElementById("winnerModalName");
-        if (modalName) modalName.innerText = "CHAMPION: " + winner.name;
+        if (modalName) modalName.innerText = winner.name;
         const modalScore = document.getElementById("winnerModalScore");
         if (modalScore) modalScore.innerText = winner.score;
         const modalRank = document.getElementById("winnerModalRank");
@@ -590,12 +591,21 @@ function triggerCinematicFinale(leaderboard) {
           modalImg.src = winner.photoUrl;
         }
 
-        const modal = document.getElementById("winnerStatsModal");
-        if (modal) {
-          modal.style.opacity = '1';
-          modal.style.pointerEvents = 'auto';
-          modal.style.transform = "translate(-50%, -50%) scale(1.2)";
-        }
+        // Populate Center Text
+        const centerName = document.getElementById("winnerCenterName");
+        if (centerName) centerName.innerText = winner.name;
+        const centerScore = document.getElementById("winnerCenterScore");
+        if (centerScore) centerScore.innerText = winner.score + " POINTS";
+
+        // Show Center Text
+        const centerOverlay = document.getElementById("winnerCenterOverlay");
+        if (centerOverlay) centerOverlay.style.opacity = '1';
+
+        /* 
+         * Note: The polaroid modal (winnerStatsModal) is still populated, 
+         * but we won't automatically pop it up in the center anymore 
+         * because it blocks the 3D cinematic. 
+         */
       }, 500);
     }
   });
@@ -606,7 +616,7 @@ function triggerCinematicFinale(leaderboard) {
   const focusPodium = (rankIndex, duration) => {
     if (!top1[rankIndex]) return;
     const podInfo = podiums.find(p => p.playerId === top1[rankIndex].id);
-    if (!podInfo) return;
+    if (!podInfo || !podInfo.bust) return; // FIX: Ensure bust is loaded
 
     const targetPos = new THREE.Vector3();
     podInfo.bust.getWorldPosition(targetPos);
