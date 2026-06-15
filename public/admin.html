@@ -1195,10 +1195,12 @@
         <aside class="sidebar">
             <div>
                 <!-- Game Hub Header & Room Code -->
-                <div class="sidebar-header">
+                <div class="sidebar-header" style="position: relative;">
                     <div class="sidebar-logo">
                         <span style="color:var(--neon-cyan);">⬢</span> HELIX CONTROL
                     </div>
+                    <!-- Mobile Close Button -->
+                    <button id="sidebarCloseBtnMobile" class="mobile-only-controls" style="position: absolute; top: 0; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; display: none;">&times;</button>
                     <div class="session-badge" onclick="document.getElementById('qrOverlay').classList.add('active')">
                         <span style="font-size:0.6rem; opacity:0.6; text-transform:uppercase; font-weight:800; color:rgba(255,255,255,0.6);">Lobby Code</span>
                         <span class="session-code" id="displayCode">------</span>
@@ -1228,7 +1230,7 @@
         </aside>
 
         <!-- SIDEBAR OVERLAY FOR MOBILE -->
-        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+        <div id="sidebarOverlay" class="sidebar-overlay" style="cursor: pointer;"></div>
 
         <!-- MAIN WINDOW -->
         <main class="main-content">

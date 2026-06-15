@@ -592,6 +592,16 @@ function switchTab(activeBtn, activeContent) {
             renderDossierDetail(selectedPlayerId);
         }
     }
+    // Force close mobile sidebar on switch
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    if (sidebar && sidebar.classList.contains("open")) {
+        sidebar.classList.remove("open");
+    }
+    if (sidebarOverlay && sidebarOverlay.classList.contains("active")) {
+        sidebarOverlay.classList.remove("active");
+    }
+
     dbg.innerText = `switchTab: ${activeId} -> ${contentId} (done)`;
 }
 
@@ -1030,6 +1040,14 @@ if (sidebarToggleBtn && sidebar && sidebarOverlay) {
         sidebar.classList.remove("open");
         sidebarOverlay.classList.remove("active");
     };
+
+    const sidebarCloseBtnMobile = document.getElementById("sidebarCloseBtnMobile");
+    if (sidebarCloseBtnMobile) {
+        sidebarCloseBtnMobile.onclick = () => {
+            sidebar.classList.remove("open");
+            sidebarOverlay.classList.remove("active");
+        };
+    }
 
     // Close sidebar on navigation action
     const sidebarLinks = sidebar.querySelectorAll(".sidebar-link");
