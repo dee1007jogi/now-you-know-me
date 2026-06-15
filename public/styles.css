@@ -50,6 +50,12 @@ body {
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
     overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+a, button {
+    touch-action: manipulation;
 }
 
 body::after {
