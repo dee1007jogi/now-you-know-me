@@ -1025,15 +1025,19 @@ if (nudgeBtn) {
     };
 }
 
-// Mobile sidebar collapse logic
+// Sidebar collapse logic (Desktop & Mobile)
 const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
 const sidebar = document.querySelector(".sidebar");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 
 if (sidebarToggleBtn && sidebar && sidebarOverlay) {
     sidebarToggleBtn.onclick = () => {
-        sidebar.classList.add("open");
-        sidebarOverlay.classList.add("active");
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add("open");
+            sidebarOverlay.classList.add("active");
+        } else {
+            sidebar.classList.toggle("collapsed");
+        }
     };
 
     sidebarOverlay.onclick = () => {
@@ -1049,12 +1053,14 @@ if (sidebarToggleBtn && sidebar && sidebarOverlay) {
         };
     }
 
-    // Close sidebar on navigation action
+    // Close sidebar on navigation action (mobile only)
     const sidebarLinks = sidebar.querySelectorAll(".sidebar-link");
     sidebarLinks.forEach(link => {
         link.addEventListener("click", () => {
-            sidebar.classList.remove("open");
-            sidebarOverlay.classList.remove("active");
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove("open");
+                sidebarOverlay.classList.remove("active");
+            }
         });
     });
 }
