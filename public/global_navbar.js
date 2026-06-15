@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <img src="/assets/default_avatar.png" class="global-navbar-avatar" id="globalNavAvatar" alt="Profile">
             <span class="global-navbar-name" id="globalNavName">Guest</span>
         </div>
-        <a href="/leaderboard" class="global-navbar-btn">🏆 Leaderboard</a>
+        <a href="/leaderboard.html" class="global-navbar-btn">🏆 Leaderboard</a>
     </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', navbarHtml);
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (nameInput) nameInput.focus();
         } else {
             // Go to profile page to view/edit
-            window.location.href = "/profile";
+            window.location.href = "/profile.html";
         }
     };
 });
