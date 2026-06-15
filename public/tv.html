@@ -206,52 +206,18 @@
             opacity: 0.8;
         }
 
-        /* MASCOT OVERLAYS (GLASS) */
-        .mascot-glass {
+        /* ANIMATED BACKGROUND */
+        .ambient-bg {
             position: absolute;
-            bottom: 40px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 20px 30px;
-            border-radius: 25px;
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            animation: float-ui 4s ease-in-out infinite;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.1) 0%, rgba(2, 6, 23, 1) 100%);
+            z-index: 1;
+            animation: pulse-bg 8s infinite alternate;
         }
 
-        @keyframes float-ui {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .left-mascot {
-            left: 60px;
-        }
-
-        .right-mascot {
-            right: 60px;
-        }
-
-        .mascot-info h4 {
-            font-family: 'Cinzel';
-            font-weight: 900;
-            font-size: 1rem;
-            color: var(--gold);
-        }
-
-        .mascot-info p {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            font-weight: 600;
+        @keyframes pulse-bg {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
         .hidden {
@@ -262,7 +228,7 @@
 
 <body>
 
-    <div id="webgl-container"></div>
+    <div class="ambient-bg"></div>
 
     <!-- Winner Heading Overlay -->
     <div id="winnerHeadingContainer" style="position: absolute; top: 0; bottom: 0; right: 8%; z-index: 50; pointer-events: none; display: flex; align-items: center; justify-content: center;">
@@ -283,36 +249,41 @@
         <div id="winnerCenterSelfies" style="font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 700; color: #38bdf8; margin-top: 10px; text-shadow: 0 5px 20px rgba(56, 189, 248, 0.8); letter-spacing: 2px;">0 SELFIES</div>
     </div>
 
-    <div class="tv-ui" style="display: none;"></div>
-
-    <!-- Winner Stats Modal -->
-    <div id="winnerStatsModal" style="z-index: 9000; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; pointer-events: none; transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        <div style="background-color: #ffffff; border: 12px solid #6d28d9; border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); text-align: center; width: 440px; overflow: hidden; position: relative;">
-            
-            <div style="padding: 16px 16px 0 16px;">
-                <img id="winnerModalImg" src="" style="width: 100%; height: 480px; border-radius: 8px; object-fit: cover; background: #6d28d9; display: block;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22white%22%3E%3Cpath d=%22M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z%22/%3E%3C/svg%3E'"/>
-            </div>
-            
-            <div style="padding: 30px 20px 35px 20px; background-color: #ffffff;">
-                <h2 id="winnerModalName" style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 900; color: #111827; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1;">YOUR NAME HERE</h2>
-                
-                <div style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #4b5563; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">
-                    @SCORE_<span id="winnerModalScore">0</span>
-                    <span id="winnerModalRank" style="display:none;">#1</span>
+    <div class="tv-ui">
+        <div class="tv-header">
+            <div class="tv-logo">
+                <div class="logo-box">
+                    <span class="logo-text">🕵️</span>
                 </div>
+                <div>
+                    <h2 class="tv-title" id="tvMainTitle" style="font-size: 2rem;">TEAM LEADERS</h2>
+                    <div class="tv-subtitle" id="tvSubTitle" style="font-size: 1rem;">MISSION: DISCOVERY</div>
+                </div>
+            </div>
+            <div class="meta-group">
+                <div class="meta-item">
+                    <span class="meta-label">Agents Connected</span>
+                    <span class="meta-value" id="participantCount">0</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Operation Code</span>
+                    <span class="meta-value" style="color: var(--gold);" id="displayCode">----</span>
+                </div>
+            </div>
+        </div>
+        <div class="tv-footer">
+            <div class="call-to-action" id="tvCallToAction">Mingle & Find Your Clues! 🤝</div>
+            <div class="live-pulse">
+                <div class="pulse-dot"></div>
+                <span class="live-text">Live Network</span>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/mobile3d.js"></script>
-    <script src="/engine3d.js"></script>
     <script src="/assets/audio/bgm_controller.js"></script>
     <script src="/tv.js"></script>
 
