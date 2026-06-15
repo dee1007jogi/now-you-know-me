@@ -150,6 +150,129 @@ body::before {
     box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
 }
 
+/* ========================================================================= */
+/* CINEMATIC TITLE STYLES                                                    */
+/* ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+.cinematic-container {
+    position: relative;
+    text-align: center;
+    margin-bottom: 50px;
+    z-index: 20;
+    animation: cinematic-fade-in 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes cinematic-fade-in {
+    0% { opacity: 0; transform: scale(0.9) translateY(20px); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+
+.cinematic-title {
+    font-family: 'Cinzel', serif;
+    font-size: 4.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    /* Gradient Overlay */
+    background: linear-gradient(180deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* Complex Multi-Layer Shadow for 3D & Teal Glow */
+    text-shadow: 
+        0px 2px 0px #ca8a04,
+        0px 4px 0px #a16207,
+        0px 6px 0px #713f12,
+        0px 8px 15px rgba(0,0,0,0.9),
+        0px 0px 30px rgba(56, 189, 248, 0.4), /* Teal volumetric glow */
+        0px 0px 60px rgba(14, 165, 233, 0.2);
+    
+    position: relative;
+    white-space: nowrap;
+}
+
+/* Letter-by-letter flicker */
+.cinematic-title span {
+    display: inline-block;
+    animation: cin-flicker 4s infinite alternate;
+}
+
+.cinematic-title span:nth-child(1) { animation-delay: 0.1s; }
+.cinematic-title span:nth-child(2) { animation-delay: 0.5s; }
+.cinematic-title span:nth-child(3) { animation-delay: 0.8s; }
+.cinematic-title span:nth-child(4) { animation-delay: 0.3s; }
+.cinematic-title span:nth-child(5) { animation-delay: 0.9s; }
+.cinematic-title span:nth-child(6) { animation-delay: 0.2s; }
+.cinematic-title span:nth-child(7) { animation-delay: 0.7s; }
+.cinematic-title span:nth-child(8) { animation-delay: 0.4s; }
+.cinematic-title span:nth-child(9) { animation-delay: 1.1s; }
+.cinematic-title span:nth-child(10) { animation-delay: 0.6s; }
+.cinematic-title span:nth-child(11) { animation-delay: 0.8s; }
+.cinematic-title span:nth-child(12) { animation-delay: 0.5s; }
+.cinematic-title span:nth-child(13) { animation-delay: 1.2s; }
+.cinematic-title span:nth-child(14) { animation-delay: 0.4s; }
+.cinematic-title span:nth-child(15) { animation-delay: 0.1s; }
+
+@keyframes cin-flicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+        opacity: 1;
+        text-shadow: 
+            0px 2px 0px #ca8a04,
+            0px 4px 0px #a16207,
+            0px 6px 0px #713f12,
+            0px 8px 15px rgba(0,0,0,0.9),
+            0px 0px 30px rgba(56, 189, 248, 0.6),
+            0px 0px 60px rgba(14, 165, 233, 0.4);
+    }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+        opacity: 0.6;
+        text-shadow: 0px 0px 10px rgba(250, 204, 21, 0.3); /* faint gold */
+    }
+}
+
+.cinematic-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: #e2e8f0;
+    text-transform: lowercase;
+    letter-spacing: 0.6em;
+    margin-top: 20px;
+    opacity: 0; /* starts hidden for fade in */
+    animation: tagline-reveal 3s ease-out 1.5s forwards;
+    text-shadow: 0 2px 15px rgba(56, 189, 248, 0.6);
+}
+
+@keyframes tagline-reveal {
+    0% { opacity: 0; transform: translateY(-5px); letter-spacing: 0.3em; filter: blur(5px); }
+    100% { opacity: 0.6; transform: translateY(0); letter-spacing: 0.6em; filter: blur(0); }
+}
+
+@media (max-width: 768px) {
+    .cinematic-title {
+        font-size: 2.8rem;
+        /* Reduce heavy text shadows on mobile */
+        text-shadow: 
+            0px 2px 0px #ca8a04,
+            0px 4px 0px #713f12,
+            0px 5px 10px rgba(0,0,0,0.8),
+            0px 0px 20px rgba(56, 189, 248, 0.4);
+        white-space: normal;
+    }
+    .cinematic-tagline {
+        font-size: 0.8rem;
+        letter-spacing: 0.3em;
+    }
+    @keyframes tagline-reveal {
+        100% { opacity: 0.6; transform: translateY(0); letter-spacing: 0.4em; filter: blur(0); }
+    }
+}
+
 /* Container */
 .container {
     max-width: 540px;
