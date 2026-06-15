@@ -1147,12 +1147,18 @@ select {
          b a c k g r o u n d :   # 3 8 b d f 8   ! i m p o r t a n t ;   c o l o r :   w h i t e   ! i m p o r t a n t ;   t r a n s f o r m :   s c a l e ( 1 . 1 )   ! i m p o r t a n t ; 
          b o x - s h a d o w :   0   0   3 0 p x   r g b a ( 5 6 ,   1 8 9 ,   2 4 8 ,   0 . 6 )   ! i m p o r t a n t ; 
  } 
-  
- / *  
- G l o b a l  
- N a v b a r  
- S t y l e s  
- * /  
+ 
+ 
+ / * 
+ 
+ G l o b a l 
+ 
+ N a v b a r 
+ 
+ S t y l e s 
+ 
+ * / 
+ 
  
 /* Global Cinematic Game Title */
 .global-game-title {

@@ -549,7 +549,7 @@
     <!-- Header Section -->
     <div class="header-section">
         <div class="header-title">
-            <h1>🚨 MISSION: ACTIVE</h1>
+            <h1>📊 Operation Dashboard</h1>
             <p>Intelligence Leaderboard & Live Investigation Feed</p>
         </div>
         <div class="game-status-pill">
@@ -568,8 +568,7 @@
                     <h3>📊 Ranking List</h3>
                     <span id="playerCountText" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 800;">0 Agents</span>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Sort by:</span>
+                <div style="display: flex; gap: 10px;">
                     <select id="leaderboardSort" onchange="handleSortChange()" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 5px 10px; font-size: 0.8rem; font-family: 'Outfit'; flex: 1; outline: none; cursor: pointer;">
                         <option value="score_desc" style="background: #0f172a;">Highest Score</option>
                         <option value="score_asc" style="background: #0f172a;">Lowest Score</option>
@@ -593,7 +592,7 @@
                     <span id="selfiesCountText" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 800;">0 Snaps</span>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Selfies by: <strong id="currentSelfieFilter" style="color: var(--neon-cyan);">All Players</strong></span>
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Filter by: <strong id="currentSelfieFilter" style="color: var(--neon-cyan);">All Players</strong></span>
                     <button onclick="clearSelfieFilter()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: none;" id="clearFilterBtn">CLEAR FILTER</button>
                 </div>
             </div>
@@ -687,8 +686,7 @@
             statusEl.style.color = state.status === "live" ? "#10b981" : (state.status === "ended" ? "#ef4444" : "#fbbf24");
 
             // Players Count
-            const pc = state.playersCount || 0;
-            document.getElementById("playerCountText").innerText = `${pc} Agent${pc === 1 ? '' : 's'}`;
+            document.getElementById("playerCountText").innerText = `${state.playersCount || 0} Agents`;
 
             // Render Leaderboard list
             renderLeaderboardList();
@@ -760,10 +758,7 @@
                             <span class="player-name">${p.name || 'Anonymous Intelligence'} ${lobbyStatusBadge}</span>
                         </div>
                     </div>
-                    <div class="player-score" style="display:flex; flex-direction:column; align-items:flex-end;">
-                        <span style="font-size:0.6rem; color:rgba(255,255,255,0.5); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:2px;">Score</span>
-                        <span>${p.score || 0} <span style="font-size:0.8rem; color:rgba(255,255,255,0.6);">pts</span></span>
-                    </div>
+                    <span class="player-score">${p.score || 0} <span>pts</span></span>
                 `;
 
                 container.appendChild(row);
@@ -793,12 +788,7 @@
             const countEl = document.getElementById("selfiesCountText");
 
             if (!appState || !appState.selfies || appState.selfies.length === 0) {
-                container.innerHTML = `
-                    <div style="padding:40px; text-align:center; color:white;">
-                        <div style="opacity:0.4; margin-bottom: 20px; font-size:1.1rem;">No selfies captured in this session yet.</div>
-                        <button onclick="window.location.href='/'" class="btn" style="padding: 12px 24px; font-size: 0.9rem; background: rgba(56,189,248,0.1); border: 1px solid #38bdf8; border-radius: 12px; color: #38bdf8; cursor: pointer; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">📸 Capture First Selfie</button>
-                    </div>
-                `;
+                container.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.3; color:white;">No selfies captured in this session yet. 📸</div>`;
                 countEl.innerText = "0 Snaps";
                 return;
             }
