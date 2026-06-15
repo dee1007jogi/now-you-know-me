@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="/leaderboard.html" class="global-navbar-btn">🏆 Leaderboard</a>
     </div>
 
+    <!-- Global Cinematic Title -->
+    <div class="global-game-title">
+        <h1 class="main-title">NOW YOU<br>KNOW ME</h1>
+        <div class="sub-title">the truth has a face</div>
+    </div>
+
     <!-- Sidebar Overlay -->
     <div id="profileSidebarOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;"></div>
     
