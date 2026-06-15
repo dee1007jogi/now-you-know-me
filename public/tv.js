@@ -465,7 +465,7 @@ function createTextLabel(text) {
   return sprite;
 }
 
-function updateTextLabel(label, name, score) {
+function updateTextLabel(label, name, score, selfiesCount = 0) {
   const canvas = label.material.map.image;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 512, 128);
@@ -478,13 +478,13 @@ function updateTextLabel(label, name, score) {
   ctx.stroke();
 
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 50px Plus Jakarta Sans';
+  ctx.font = 'bold 45px Plus Jakarta Sans';
   ctx.textAlign = 'center';
-  ctx.fillText(name, 256, 50);
+  ctx.fillText(name, 256, 40);
 
   ctx.fillStyle = '#fbbf24';
-  ctx.font = '900 40px Outfit';
-  ctx.fillText(`${score} PTS`, 256, 100);
+  ctx.font = '900 35px Outfit';
+  ctx.fillText(`${score} PTS | ${selfiesCount} Selfies`, 256, 95);
 
   label.material.map.needsUpdate = true;
 }
@@ -568,7 +568,7 @@ function triggerCinematicFinale(leaderboard) {
   if (!orbitControls) return;
   orbitControls.enabled = false;
 
-  const top3 = leaderboard.slice(0, 3);
+  const top1 = leaderboard.slice(0, 1);
   const sequence = gsap.timeline({
     onComplete: () => {
       orbitControls.enabled = true;
@@ -604,15 +604,15 @@ function triggerCinematicFinale(leaderboard) {
   sequence.to({}, { duration: 0.1 });
 
   const focusPodium = (rankIndex, duration) => {
-    if (!top3[rankIndex]) return;
-    const podInfo = podiums.find(p => p.playerId === top3[rankIndex].id);
+    if (!top1[rankIndex]) return;
+    const podInfo = podiums.find(p => p.playerId === top1[rankIndex].id);
     if (!podInfo) return;
 
     const targetPos = new THREE.Vector3();
     podInfo.bust.getWorldPosition(targetPos);
 
     sequence.to(engine.camera.position, {
-      x: targetPos.x + (rankIndex === 0 ? 0 : (rankIndex === 1 ? -10 : 10)),
+      x: targetPos.x,
       y: targetPos.y + 5,
       z: targetPos.z + 15,
       duration: duration,
@@ -623,14 +623,12 @@ function triggerCinematicFinale(leaderboard) {
     });
   };
 
-  if (top3.length > 2) focusPodium(2, 3); // focus 3rd place
-  if (top3.length > 1) focusPodium(1, 3); // focus 2nd place
-  if (top3.length > 0) focusPodium(0, 4); // focus 1st place
+  if (top1.length > 0) focusPodium(0, 4); // focus 1st place
 }
 
 function syncPodiums(leaderboard) {
-  // Only show Top 3 players
-  const top = leaderboard.slice(0, 3);
+  // Only show the final winner, and only when the game has ended
+  const top = appState.status === "ended" ? leaderboard.slice(0, 1) : [];
 
   // Reset all podium visibility flags
   podiums.forEach(p => p.activeThisFrame = false);
@@ -665,7 +663,7 @@ function syncPodiums(leaderboard) {
       }
 
       // Update labels
-      updateTextLabel(pod.label, player.name, player.score);
+      updateTextLabel(pod.label, player.name, player.score, player.correct);
 
       // Animate to rank position
       gsap.to(pod.group.position, {

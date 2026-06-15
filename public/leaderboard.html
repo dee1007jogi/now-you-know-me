@@ -22,7 +22,8 @@
             margin: 0;
             font-family: 'Outfit', 'Inter', sans-serif;
             padding: 30px;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
@@ -101,8 +102,9 @@
             display: flex;
             gap: 25px;
             flex: 1;
-            height: calc(100vh - 130px);
-            overflow: hidden;
+            min-height: calc(100vh - 130px);
+            height: auto;
+            overflow: visible;
             box-sizing: border-box;
         }
 
@@ -470,6 +472,21 @@
                 width: 100% !important;
                 height: 450px !important;
             }
+        }
+
+        .column-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .column-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .column-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
     </style>
 </head>

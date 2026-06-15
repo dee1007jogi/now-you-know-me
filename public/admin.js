@@ -772,8 +772,18 @@ window.renderLeaderboardList = function() {
     }
 
     filteredPlayers.forEach((p, i) => {
+        const rank = i + 1;
+        let rankClass = "";
+        let rankMedal = "";
+        if (rank === 1) { rankClass = "rank-1"; rankMedal = "🥇 "; }
+        else if (rank === 2) { rankClass = "rank-2"; rankMedal = "🥈 "; }
+        else if (rank === 3) { rankClass = "rank-3"; rankMedal = "🥉 "; }
+
+        const wrongPenalty = (p.wrong || 0) * 30; // 30 pts penalty per wrong answer
+        const penaltyHtml = wrongPenalty > 0 ? `<span class="player-penalty" style="color: #ef4444; font-size: 0.8rem; font-weight: 800; margin-right: 10px; text-shadow: 0 0 8px rgba(239,68,68,0.5);">(-${wrongPenalty})</span>` : "";
+
         const row = document.createElement("div");
-        row.className = `leaderboard-row animate-pop ${p.id === selectedPlayerId ? 'active' : ''}`;
+        row.className = `leaderboard-row animate-pop ${p.id === selectedPlayerId ? 'active' : ''} ${rankClass}`;
         row.onclick = () => {
             document.querySelectorAll(".leaderboard-row").forEach(r => r.classList.remove("active"));
             row.classList.add("active");
@@ -794,13 +804,16 @@ window.renderLeaderboardList = function() {
 
         row.innerHTML = `
             <div class="leaderboard-player">
-                <span class="player-rank">#${i + 1}</span>
+                <span class="player-rank">${rankMedal}#${rank}</span>
                 <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="player-avatar" />
                 <div class="player-info">
                     <span class="player-name">${p.name || 'Anonymous Intelligence'} ${lobbyStatusBadge}</span>
                 </div>
             </div>
-            <span class="player-score">${p.score || 0} <span>pts</span></span>
+            <div style="display:flex; align-items:center;">
+                ${penaltyHtml}
+                <span class="player-score">${p.score || 0} <span>pts</span></span>
+            </div>
         `;
 
         container.appendChild(row);

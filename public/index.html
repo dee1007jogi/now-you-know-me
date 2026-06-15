@@ -355,6 +355,18 @@
 
 
 
+    <!-- GAME RULES OVERLAY -->
+    <div id="gameRulesOverlay" style="position: absolute; right: 10vw; top: 50%; transform: translateY(-50%); z-index: 15; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); padding: 30px 40px; border-radius: 20px; border: 2px solid #0ea5e9; box-shadow: 0 0 40px rgba(14, 165, 233, 0.3); max-width: 400px; color: white; transition: all 0.5s ease;">
+        <h2 style="color: #facc15; margin-top: 0; font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);">Game Rules</h2>
+        <ul style="padding-left: 20px; line-height: 1.8; font-size: 1.15rem;">
+            <li style="margin-bottom: 12px;"><b>1. Join the Mystery:</b> Enter your name to start.</li>
+            <li style="margin-bottom: 12px;"><b>2. Observe:</b> Pay attention to the clues given by our hosts.</li>
+            <li style="margin-bottom: 12px;"><b>3. Match:</b> Select the suspect that matches the clues.</li>
+            <li><b>4. Win:</b> Crack the case and earn points!</li>
+        </ul>
+        <div style="text-align: center; margin-top: 25px; color: #38bdf8; font-weight: bold; font-size: 1.1rem; animation: pulse-glow 2s infinite;">Loading 3D Models...</div>
+    </div>
+
     <!-- REAL JOIN SCREEN -->
     <div id="joinScreen"
         style="display:flex; opacity:1; transition: opacity 0.8s ease-in, transform 0.8s ease-out; position: absolute; inset:0; z-index:10; padding-left: 10vw; align-items: center; justify-content: flex-start;">
@@ -667,6 +679,12 @@
                     engine.loadGLTF(data.path, (model) => resolve({ model, data }));
                 });
                 const loadedAssets = await Promise.all(mascotsData.map(loadModel));
+
+                // Fade out game rules once models are loaded
+                const rulesOverlay = document.getElementById("gameRulesOverlay");
+                if (rulesOverlay) {
+                    gsap.to(rulesOverlay, { opacity: 0, scale: 0.9, duration: 0.8, ease: "power2.inOut", onComplete: () => rulesOverlay.style.display = "none" });
+                }
 
                 const mascots = {};
                 window._mascots = mascots; // Save globally for phase transitions

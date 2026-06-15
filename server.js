@@ -136,7 +136,7 @@ async function warmUpMemoryStore() {
         // 2. Warm up Players Map
         const dbPlayers = await Player.find();
         dbPlayers.forEach(p => {
-            const pObj = p.toObject();
+            const pObj = p.toObject({ flattenMaps: true });
             playersMap.set(pObj.id, pObj);
         });
         console.log(`👥 Loaded ${playersMap.size} players into memory.`);
@@ -501,7 +501,11 @@ app.get("/api/current-card/:playerId", async (req, res) => {
         if (!targetPlayer) return res.status(404).json({ error: "Target player not found" });
 
         if (!p.openedAt) p.openedAt = {};
-        let openedTs = p.openedAt[targetId];
+        if (!p.openedAt[targetPlayer.cardId]) {
+            p.openedAt[targetPlayer.cardId] = Date.now();
+            await savePlayer(p);
+        }
+        let openedTs = p.openedAt[targetPlayer.cardId];
 
         res.json({
             cardIndex: p.currentGuessIndex,
@@ -528,7 +532,13 @@ app.post("/api/attempt", async (req, res) => {
 
         // Use the cardId sent from the frontend to determine elapsed time
         const targetId = cardId; 
-        const openedTs = p.openedAt ? p.openedAt[targetId] : null;
+        const isMap = p.openedAt instanceof Map;
+        let openedTs = null;
+        if (isMap) {
+            openedTs = p.openedAt.get(targetId);
+        } else if (p.openedAt) {
+            openedTs = p.openedAt[targetId];
+        }
         const elapsed = openedTs ? Math.max(0, Math.floor((Date.now() - openedTs) / 1000)) : 999;
 
         const guessedPlayer = await getPlayer(guessedPersonId);
@@ -590,8 +600,18 @@ app.post("/api/guess", async (req, res) => {
         const guessedPlayer = await getPlayer(guessedPersonId);
         if (!guessedPlayer) return res.status(404).json({ error: "Guessed player not found" });
 
-        const openedTs = p.openedAt ? p.openedAt[targetId] : null;
+        const openedTs = p.openedAt ? p.openedAt[targetPlayer.cardId] : null;
         const elapsed = openedTs ? Math.max(0, Math.floor((Date.now() - openedTs) / 1000)) : 999;
+        
+        require('fs').appendFileSync('guess_debug.log', JSON.stringify({
+            event: 'guess',
+            playerId,
+            targetPlayerCardId: targetPlayer.cardId,
+            pOpenedAt: p.openedAt,
+            openedTs,
+            elapsed,
+            dateNow: Date.now()
+        }) + '\n');
 
         const isCorrect = (guessedPersonId === targetId);
         let scoreDelta = 0;
@@ -657,11 +677,11 @@ app.post("/api/submit-selfie", upload.single("photo"), async (req, res) => {
 
         // Apply points and advance
         p.score = Math.max(0, (p.score || 0) + p.pendingGuess.scoreDelta);
+        p.photoUrl = b64; // Update photo unconditionally on leaderboard with the latest selfie
         
         if (p.pendingGuess.isCorrect) {
             p.correct = (p.correct || 0) + 1;
             p.correctTimes.push(p.pendingGuess.elapsed);
-            p.photoUrl = b64; // Update photo on leaderboard with the correct selfie
             p.currentGuessIndex = (p.currentGuessIndex || 0) + 1;
         } else {
             p.wrong = (p.wrong || 0) + 1;
