@@ -982,6 +982,10 @@ if (modalConfirm) modalConfirm.onclick = async () => {
             }, 2000);
         } else {
             mascotPenalty();
+            
+            // Show negative points popup
+            animatePointsPopup(`${out.delta} PTS`, true);
+
             // Shake Screen
             gsap.to(engine.camera.position, { x: 0.5, duration: 0.1, yoyo: true, repeat: 5 });
 
@@ -995,6 +999,10 @@ if (modalConfirm) modalConfirm.onclick = async () => {
                     wrongSphere.material.emissiveIntensity = 0.1;
                 }, 1000);
             }
+
+            // Immediately update the score display
+            if (currentUserData) currentUserData.score = out.score;
+            document.getElementById("pillValue").innerText = currentUserData?.score || 0;
 
             // Show cooldown after wrong guess
             setTimeout(() => showCooldown(30), 1000);
@@ -1040,9 +1048,19 @@ function fireConfetti(n) {
     }
 }
 
-function animatePointsPopup(text) {
+function animatePointsPopup(text, isNegative = false) {
     const p = document.getElementById("pointsPopup");
     p.innerText = text;
+    
+    // Change text color and glow based on score
+    if (isNegative) {
+        p.style.color = "#f87171"; // Red
+        p.style.textShadow = "0 0 20px rgba(248,113,113,0.8), 2px 2px 0 #991b1b";
+    } else {
+        p.style.color = "#facc15"; // Yellow
+        p.style.textShadow = "0 0 20px rgba(250,204,21,0.8), 2px 2px 0 #ca8a04";
+    }
+
     gsap.fromTo(p, { opacity: 0, scale: 0.5, y: -20 }, { opacity: 1, scale: 1, y: -100, duration: 1, onComplete: () => gsap.to(p, { opacity: 0, duration: 0.5 }) });
 }
 // ---- Close Identification Modal (Sleek Camera Rollback) ----

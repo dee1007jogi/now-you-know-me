@@ -554,7 +554,7 @@ app.post("/api/attempt", async (req, res) => {
             scoreDelta = -20;
         }
 
-        p.score = Math.max(0, (p.score || 0) + scoreDelta);
+        p.score = (p.score || 0) + scoreDelta;
         
         if (isCorrect) {
             p.correct = (p.correct || 0) + 1;
