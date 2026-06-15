@@ -759,7 +759,7 @@
                 row.innerHTML = `
                     <div class="leaderboard-player">
                         <span class="player-rank">#${i + 1}</span>
-                        <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="player-avatar" />
+                        <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="player-avatar" / loading="lazy">
                         <div class="player-info">
                             <span class="player-name">${p.name || 'Anonymous Intelligence'} ${lobbyStatusBadge}</span>
                         </div>
@@ -831,7 +831,7 @@
 
                 card.innerHTML = `
                     <div class="stream-img-container">
-                        <img src="${s.photoUrl}" alt="Selfie Snapshot" />
+                        <img src="${s.photoUrl}" alt="Selfie Snapshot" / loading="lazy">
                         <div class="stream-badges">
                             ${correctBadge}
                             ${pointsBadge}

@@ -371,7 +371,7 @@
         <!-- Header -->
         <div class="profile-header">
             <div class="avatar-wrap">
-                <img id="avatarImg" src="/assets/detective_sketch.png" class="avatar-img" alt="Avatar">
+                <img id="avatarImg" src="/assets/detective_sketch.png" class="avatar-img" alt="Avatar" loading="lazy">
             </div>
             <div class="agent-meta">
                 <h1 id="agentName">Agent Name</h1>
@@ -580,7 +580,7 @@
                     const scard = document.createElement("div");
                     scard.className = "selfie-card";
                     scard.innerHTML = `
-                        <img src="${s.photoUrl}" class="selfie-img" alt="Selfie">
+                        <img src="${s.photoUrl}" class="selfie-img" alt="Selfie" loading="lazy">
                         <div class="selfie-vs">vs ${s.guessedName}</div>
                     `;
                     selfiesContainer.appendChild(scard);
