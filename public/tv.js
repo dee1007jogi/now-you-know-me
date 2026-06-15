@@ -407,37 +407,7 @@ function showWinnerModal(podiumInfo) {
 }
 
 function createPodiumLayout() {
-  // We pre-create 10 podiums and animate them based on rank
-  const scene = engine.scene;
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.1 });
-
-  for (let i = 0; i < 10; i++) {
-    const group = new THREE.Group();
-
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(2, 2.2, 1, 32);
-    const base = new THREE.Mesh(baseGeo, goldMat);
-    group.add(base);
-
-    // Photo Bust (Initial placeholder)
-    const bustGeo = new THREE.SphereGeometry(1.2, 32, 32);
-    const bustMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
-    const bust = new THREE.Mesh(bustGeo, bustMat);
-    bust.position.y = 2.5;
-    group.add(bust);
-
-    // Label Panel (Canvas)
-    const label = createTextLabel("Detective");
-    label.position.y = 0.8;
-    group.add(label);
-
-    scene.add(group);
-
-    // Dynamic hiding initially
-    group.visible = false;
-
-    podiums.push({ group, bust, label, bustMat, id: null });
-  }
+  // Podiums and 3D globes have been removed.
 }
 
 function createTextLabel(text) {
@@ -596,6 +566,8 @@ function triggerCinematicFinale(leaderboard) {
         if (centerName) centerName.innerText = winner.name;
         const centerScore = document.getElementById("winnerCenterScore");
         if (centerScore) centerScore.innerText = winner.score + " POINTS";
+        const centerSelfies = document.getElementById("winnerCenterSelfies");
+        if (centerSelfies) centerSelfies.innerText = (winner.correct || 0) + " SELFIES";
 
         // Show Center Text
         const centerOverlay = document.getElementById("winnerCenterOverlay");
@@ -610,101 +582,11 @@ function triggerCinematicFinale(leaderboard) {
     }
   });
 
-  // Ensure timeline always plays and fires onComplete
   sequence.to({}, { duration: 0.1 });
-
-  const focusPodium = (rankIndex, duration) => {
-    if (!top1[rankIndex]) return;
-    const podInfo = podiums.find(p => p.playerId === top1[rankIndex].id);
-    if (!podInfo || !podInfo.bust) return; // FIX: Ensure bust is loaded
-
-    const targetPos = new THREE.Vector3();
-    podInfo.bust.getWorldPosition(targetPos);
-
-    sequence.to(engine.camera.position, {
-      x: targetPos.x,
-      y: targetPos.y + 5,
-      z: targetPos.z + 15,
-      duration: duration,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        engine.camera.lookAt(targetPos);
-      }
-    });
-  };
-
-  if (top1.length > 0) focusPodium(0, 4); // focus 1st place
 }
 
 function syncPodiums(leaderboard) {
-  // Only show the final winner, and only when the game has ended
-  const top = appState.status === "ended" ? leaderboard.slice(0, 1) : [];
-
-  // Reset all podium visibility flags
-  podiums.forEach(p => p.activeThisFrame = false);
-
-  top.forEach((player, i) => {
-    const rank = i + 1;
-    const target = getRankPos(rank);
-
-    // Find existing or pick cheapest available
-    let pod = podiums.find(p => p.playerId === player.id);
-    if (!pod) {
-      pod = podiums.find(p => !p.activeThisFrame && !p.playerId);
-      if (pod) {
-        pod.playerId = player.id;
-        // Instant transport for new entry
-        pod.group.position.set(target.x, target.y - 10, target.z);
-      }
-    }
-
-    if (pod) {
-      pod.activeThisFrame = true;
-      pod.group.visible = true;
-
-      // Update photo if it has changed (e.g. correct guess selfie uploaded)
-      if (player.photoUrl && pod.lastPhotoUrl !== player.photoUrl) {
-        pod.lastPhotoUrl = player.photoUrl;
-        new THREE.TextureLoader().load(player.photoUrl, (tex) => {
-          pod.bustMat.map = tex;
-          pod.bustMat.color.set(0xffffff);
-          pod.bustMat.needsUpdate = true;
-        });
-      }
-
-      // Update labels
-      updateTextLabel(pod.label, player.name, player.score, player.correct);
-
-      // Animate to rank position
-      gsap.to(pod.group.position, {
-        x: target.x, y: target.y, z: target.z,
-        duration: 1.2, ease: "power2.inOut"
-      });
-      gsap.to(pod.group.scale, {
-        x: target.scale, y: target.scale, z: target.scale,
-        duration: 1.2, ease: "back.out(1.2)"
-      });
-
-      // Special: Confetti for Rank 1 change?
-      if (rank === 1 && pod.lastRank !== 1) {
-        fireConfetti();
-        if (mascots.owl) gsap.from(mascots.owl.scale, { x: 12, y: 12, z: 12, duration: 0.5, yoyo: true, repeat: 1 });
-        if (window.bgmController) {
-          window.bgmController.setVolume(window.bgmController.volumes[appState.status || 'lobby'] + 0.2, 500);
-          setTimeout(() => window.bgmController.syncWithState(appState), 2000);
-        }
-      }
-      pod.lastRank = rank;
-    }
-  });
-
-  // Hide inactive podiums
-  podiums.forEach(p => {
-    if (!p.activeThisFrame) {
-      p.group.visible = false;
-      p.playerId = null;
-    }
-  });
+  // Logic removed
 }
 
 function updateMissionCode() {
