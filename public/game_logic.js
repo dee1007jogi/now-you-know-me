@@ -22,6 +22,8 @@ const mascotsData = window.Mobile3D.getLoginMascotData();
 
 
 window.initPlayerGame = function () {
+    if (window.hasInitedGame) return;
+    window.hasInitedGame = true;
     engine = window.engine;
     playerId = localStorage.getItem("playerId");
     if (!playerId) return;
@@ -303,7 +305,7 @@ async function transitionTo(stageName) {
     }
 
     // Wide Angle Cinematic View for the Hall (Long Shot)
-    if (stageName === "questions" && engine) {
+    if ((stageName === "questions" || stageName === "waiting") && engine) {
         const camConf = window.Mobile3D ? window.Mobile3D.getCameraConfig("questions") : { z: 95, y: 12, x: -2 };
         gsap.to(engine.camera.position, {
             z: camConf.z,
@@ -317,7 +319,11 @@ async function transitionTo(stageName) {
         if (boardMesh) boardMesh.visible = true;
         if (screenBorder) screenBorder.visible = true;
 
-        // Reset Mascots to Office Positions (Questions Page Style)
+        if (stageName === "waiting" && typeof updateBoardText === "function") {
+            updateBoardText("Answers saved! Waiting for admin to start... ⏳");
+        }
+
+    // Reset Mascots to Office Positions (Questions Page Style)
         if (window._mascots) {
             let activeTargetConfig = playerTargetConfig;
             if (window.innerWidth <= 768 && window.Mobile3D && window.Mobile3D.getQuestionsMascotConfig()) {
@@ -559,6 +565,10 @@ socket.on("connect", () => console.log("Connected as", playerId));
 socket.on("state", (s) => {
     appState = s;
     currentUserData = s.leaderboard.find(p => p.id === playerId);
+
+    if (currentUserData && !window.hasInitedGame) {
+        if (window.initPlayerGame) window.initPlayerGame();
+    }
 
     if (currentUserData) {
         document.getElementById("pillValue").innerText = currentUserData.score;
