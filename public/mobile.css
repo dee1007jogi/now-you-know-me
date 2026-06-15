@@ -132,6 +132,10 @@
   }
 
   /* Selfie Booth Adjustments */
+  #gameRulesOverlay {
+    display: none !important;
+  }
+
   .selfie-frame-container {
     width: 85vw !important;
     height: 55vh !important;
