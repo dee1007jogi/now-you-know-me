@@ -1,18 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Inject Navbar
     const navbarHtml = `
+    <!-- Top Left Title -->
+    <div class="global-navbar-title" id="globalNavTitle" onclick="location.href='/'">
+        NOW YOU<br/>KNOW ME
+    </div>
+
+    <!-- Top Right Navbar -->
     <div class="global-navbar" id="globalNavbarEl">
         <div class="global-navbar-profile" id="globalNavProfileBtn">
             <img src="/assets/default_avatar.png" class="global-navbar-avatar" id="globalNavAvatar" alt="Profile">
             <span class="global-navbar-name" id="globalNavName">Guest</span>
         </div>
         <a href="/leaderboard.html" class="global-navbar-btn">🏆 Leaderboard</a>
-    </div>
-
-    <!-- Global Cinematic Title -->
-    <div class="global-game-title">
-        <h1 class="main-title">NOW YOU<br>KNOW ME</h1>
-        <div class="sub-title">the truth has a face</div>
     </div>
 
     <!-- Sidebar Overlay -->
@@ -24,6 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', navbarHtml);
+
+    // Show title only if not on main page
+    const isMainPage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    if (!isMainPage) {
+        document.getElementById("globalNavTitle").style.display = "block";
+    }
 
     // Load Data
     const savedName = localStorage.getItem("playerName");
