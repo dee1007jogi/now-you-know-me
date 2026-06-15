@@ -535,54 +535,35 @@ function updateUI(s) {
 }
 
 function triggerCinematicFinale(leaderboard) {
-  if (!orbitControls) return;
-  orbitControls.enabled = false;
-
-  const top1 = leaderboard.slice(0, 1);
-  const sequence = gsap.timeline({
-    onComplete: () => {
-      orbitControls.enabled = true;
-      orbitControls.target.set(0, 4, -10);
-
-      // Trigger Center Overlay and Winner Modal after camera pans
-      setTimeout(() => {
-        const winner = leaderboard[0];
-        if (!winner) return;
-        
-        // Populate Polaroid Card
-        const modalName = document.getElementById("winnerModalName");
-        if (modalName) modalName.innerText = winner.name;
-        const modalScore = document.getElementById("winnerModalScore");
-        if (modalScore) modalScore.innerText = winner.score;
-        const modalRank = document.getElementById("winnerModalRank");
-        if (modalRank) modalRank.innerText = "#1";
-        const modalImg = document.getElementById("winnerModalImg");
-        if (modalImg && winner.photoUrl) {
-          modalImg.src = winner.photoUrl;
-        }
-
-        // Populate Center Text
-        const centerName = document.getElementById("winnerCenterName");
-        if (centerName) centerName.innerText = winner.name;
-        const centerScore = document.getElementById("winnerCenterScore");
-        if (centerScore) centerScore.innerText = winner.score + " POINTS";
-        const centerSelfies = document.getElementById("winnerCenterSelfies");
-        if (centerSelfies) centerSelfies.innerText = (winner.correct || 0) + " SELFIES";
-
-        // Show Center Text
-        const centerOverlay = document.getElementById("winnerCenterOverlay");
-        if (centerOverlay) centerOverlay.style.opacity = '1';
-
-        /* 
-         * Note: The polaroid modal (winnerStatsModal) is still populated, 
-         * but we won't automatically pop it up in the center anymore 
-         * because it blocks the 3D cinematic. 
-         */
-      }, 500);
+  const winner = leaderboard[0];
+  if (!winner) return;
+  
+  // Trigger Center Overlay and Winner Modal after a short delay
+  setTimeout(() => {
+    // Populate Polaroid Card (kept for consistency if needed)
+    const modalName = document.getElementById("winnerModalName");
+    if (modalName) modalName.innerText = winner.name;
+    const modalScore = document.getElementById("winnerModalScore");
+    if (modalScore) modalScore.innerText = winner.score;
+    const modalRank = document.getElementById("winnerModalRank");
+    if (modalRank) modalRank.innerText = "#1";
+    const modalImg = document.getElementById("winnerModalImg");
+    if (modalImg && winner.photoUrl) {
+      modalImg.src = winner.photoUrl;
     }
-  });
 
-  sequence.to({}, { duration: 0.1 });
+    // Populate Center Text
+    const centerName = document.getElementById("winnerCenterName");
+    if (centerName) centerName.innerText = winner.name;
+    const centerScore = document.getElementById("winnerCenterScore");
+    if (centerScore) centerScore.innerText = winner.score + " POINTS";
+    const centerSelfies = document.getElementById("winnerCenterSelfies");
+    if (centerSelfies) centerSelfies.innerText = (winner.correct || 0) + " SELFIES";
+
+    // Show Center Text
+    const centerOverlay = document.getElementById("winnerCenterOverlay");
+    if (centerOverlay) centerOverlay.style.opacity = '1';
+  }, 500);
 }
 
 function syncPodiums(leaderboard) {
