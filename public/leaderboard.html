@@ -474,28 +474,22 @@
             }
         }
 
-        /* Mobile specific fixes (<= 600px) */
-        @media (max-width: 600px) {
-            body { 
-                padding: 15px; 
-            }
+        /* Mobile specific fixes (<= 768px) */
+        @media (max-width: 768px) {
+            body { padding: 15px; padding-top: 70px; }
             .header-section {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
+                gap: 15px;
             }
-            .header-title h1 {
-                font-size: 1.6rem;
-                line-height: 1.2;
-            }
-            .header-title p {
-                font-size: 0.75rem;
-                word-break: break-word;
+            .header-title h1 { font-size: 1.6rem; }
+            .header-title p { 
+                font-size: 0.75rem; 
                 white-space: normal;
+                word-break: break-word;
                 line-height: 1.4;
             }
             .game-status-pill {
-                align-self: flex-start;
                 padding: 6px 14px;
             }
             .leaderboard-row {
