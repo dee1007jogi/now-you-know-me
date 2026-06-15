@@ -91,6 +91,65 @@ body::before {
     }
 }
 
+/* Global Navbar Styles */
+.global-navbar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1px solid #334155;
+    backdrop-filter: blur(10px);
+}
+.global-navbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.global-navbar-profile:hover {
+    transform: scale(1.05);
+}
+.global-navbar-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #38bdf8;
+    object-fit: cover;
+}
+.global-navbar-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.global-navbar-btn {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid #fbbf24;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.global-navbar-btn:hover {
+    background: #fbbf24;
+    color: #0f172a;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
 /* Container */
 .container {
     max-width: 540px;
@@ -966,4 +1025,9 @@ select {
          b o x - s h a d o w :   0   0   3 0 p x   r g b a ( 5 6 ,   1 8 9 ,   2 4 8 ,   0 . 6 )   ! i m p o r t a n t ; 
  } 
   
+ / *  
+ G l o b a l  
+ N a v b a r  
+ S t y l e s  
+ * /  
  
