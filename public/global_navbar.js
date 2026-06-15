@@ -2,8 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Inject Navbar
     const navbarHtml = `
     <!-- Top Left Title -->
-    <div class="global-navbar-title" id="globalNavTitle" onclick="location.href='/'">
-        NOW YOU<br/>KNOW ME
+    <div id="globalNavTitle" style="position: absolute; top: 15px; left: 30px; z-index: 1000; display: none; cursor: pointer; transform: scale(0.35); transform-origin: top left;" onclick="location.href='/'">
+        <div class="cinematic-container" style="margin: 0;">
+            <div class="cinematic-title">
+                <span>N</span><span>O</span><span>W</span>&nbsp;<span>Y</span><span>O</span><span>U</span><br/>
+                <span>K</span><span>N</span><span>O</span><span>W</span>&nbsp;<span>M</span><span>E</span>
+            </div>
+        </div>
     </div>
 
     <!-- Top Right Navbar -->
