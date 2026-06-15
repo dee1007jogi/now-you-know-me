@@ -24,9 +24,10 @@
             font-family: 'Cinzel', serif;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Prevent top cut-off when scrolling */
             padding: 40px 20px;
             overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         /* Ambient Glowing Corner Orbs */
@@ -61,6 +62,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(56, 189, 248, 0.05);
             max-width: 720px;
             width: 100%;
+            margin: auto; /* Centers when smaller than viewport, but scrollable if taller */
             padding: 40px;
             backdrop-filter: blur(20px);
             animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -364,7 +366,7 @@
 
     <div class="profile-card" style="position: relative;">
         <!-- Close Button -->
-        <button class="btn-close" onclick="location.href='/crack_case.html'" title="Close Profile">✖</button>
+        <button class="btn-close" id="profileCloseBtn" title="Close Profile">✖</button>
 
         <!-- Header -->
         <div class="profile-header">
@@ -410,7 +412,7 @@
 
         <!-- Navigation Actions -->
         <div class="nav-actions">
-            <button class="btn-action btn-back" onclick="location.href='/crack_case.html'">🎮 Back to Operation</button>
+            <button class="btn-action btn-back" id="profileBackBtn">🎮 Back</button>
             <button class="btn-action btn-logout" id="logoutBtn">Logout</button>
         </div>
     </div>
@@ -422,8 +424,30 @@
         // Strict Access Control: Redirect to home page if not logged in
         if (!playerId) {
             alert("Unauthorized! Redirecting to login...");
-            location.href = "/";
+            if (window.parent && window.parent !== window) {
+                window.parent.location.href = "/";
+            } else {
+                location.href = "/";
+            }
         }
+
+        const isSidebar = new URLSearchParams(window.location.search).get("sidebar") === "1";
+
+        function closeProfile() {
+            if (isSidebar && window.parent && window.parent.closeProfileSidebar) {
+                window.parent.closeProfileSidebar();
+            } else {
+                if (document.referrer && document.referrer.includes(window.location.host)) {
+                    window.history.back();
+                } else {
+                    window.location.href = "/crack_case.html";
+                }
+            }
+        }
+
+        document.getElementById("profileCloseBtn").onclick = closeProfile;
+        document.getElementById("profileBackBtn").onclick = closeProfile;
+
 
         const socket = io();
         let appState = null;
@@ -569,7 +593,11 @@
         document.getElementById("logoutBtn").onclick = () => {
             if (confirm("Are you sure you want to log out of the operation?")) {
                 localStorage.clear();
-                location.href = "/";
+                if (window.parent && window.parent !== window) {
+                    window.parent.location.href = "/";
+                } else {
+                    location.href = "/";
+                }
             }
         };
     </script>

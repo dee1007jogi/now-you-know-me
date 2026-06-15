@@ -205,7 +205,7 @@ function renderSuspectGrid() {
     container.innerHTML = "";
     
     allPlayers.forEach(p => {
-        if (p.id === playerId) return; // Hide own profile
+        if (String(p.id) === String(playerId)) return; // Hide own profile
 
         const photoUrl = p.photoUrl || '/assets/default_avatar.png';
         const div = document.createElement("div");
