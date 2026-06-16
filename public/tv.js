@@ -81,19 +81,19 @@ async function initTV3D() {
   });
   const isMobile = window.innerWidth <= 768;
   const layout = {
-      foxX: isMobile ? 0 : -28,
+      foxX: isMobile ? -15 : -28,
       foxY: isMobile ? -6 : -1,
       foxZ: isMobile ? -5 : -1,
       foxScale: isMobile ? 5.5 : 14,
-      redPlanetX: isMobile ? 0 : -80,
+      redPlanetX: isMobile ? -15 : -80,
       redPlanetY: isMobile ? 15 : 30,
       redPlanetZ: isMobile ? -60 : -100,
       redPlanetR: isMobile ? 15 : 40,
-      jumpStartX: isMobile ? -20 : -120,
-      mountainX: isMobile ? 0 : -30,
-      mountain2X: isMobile ? -5 : -37,
-      mountain3X: isMobile ? 5 : -22,
-      lightX: isMobile ? 0 : -30,
+      jumpStartX: isMobile ? -35 : -120,
+      mountainX: isMobile ? -15 : -30,
+      mountain2X: isMobile ? -20 : -37,
+      mountain3X: isMobile ? -10 : -22,
+      lightX: isMobile ? -15 : -30,
   };
 
   let masConf = { fox: { x: layout.foxX, y: layout.foxY, z: layout.foxZ, scale: layout.foxScale } };
