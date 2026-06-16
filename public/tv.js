@@ -81,19 +81,22 @@ async function initTV3D() {
   });
   const isMobile = window.innerWidth <= 768;
   const layout = {
-      foxX: isMobile ? -15 : -28,
-      foxY: isMobile ? -6 : -1,
-      foxZ: isMobile ? -5 : -1,
-      foxScale: isMobile ? 5.5 : 14,
-      redPlanetX: isMobile ? -15 : -80,
-      redPlanetY: isMobile ? 15 : 30,
-      redPlanetZ: isMobile ? -60 : -100,
-      redPlanetR: isMobile ? 15 : 40,
-      jumpStartX: isMobile ? -35 : -120,
-      mountainX: isMobile ? -15 : -30,
-      mountain2X: isMobile ? -20 : -37,
-      mountain3X: isMobile ? -10 : -22,
-      lightX: isMobile ? -15 : -30,
+    foxX: isMobile ? -15 : -28,
+    foxY: isMobile ? 4 : -1,
+    foxZ: isMobile ? -2 : -1,
+    foxScale: isMobile ? 12.5 : 14,
+    redPlanetX: isMobile ? -25 : -80,
+    redPlanetY: isMobile ? 25 : 30,
+    redPlanetZ: isMobile ? -60 : -100,
+    redPlanetR: isMobile ? 15 : 40,
+    jumpStartX: isMobile ? -35 : -120,
+    mountainX: isMobile ? -15 : -30,
+    mountain2X: isMobile ? -2 : -37,
+    mountain3X: isMobile ? -2 : -22,
+    mountainY: isMobile ? -15 : -25,
+    mountain2Y: isMobile ? -10 : -30,
+    mountain3Y: isMobile ? -20 : -35,
+    lightX: isMobile ? -15 : -30,
   };
 
   let masConf = { fox: { x: layout.foxX, y: layout.foxY, z: layout.foxZ, scale: layout.foxScale } };
@@ -192,94 +195,94 @@ async function initTV3D() {
     const dustCount = 20; // Minimal dust
     const dustGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
     const dustMat = new THREE.MeshBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.7 });
-    
-    for(let i=0; i<dustCount; i++) {
-        const dust = new THREE.Mesh(dustGeo, dustMat);
-        // Start near his feet
-        dust.position.set(
-          masConf.fox.x + (Math.random()-0.5)*8, 
-          masConf.fox.y, 
-          masConf.fox.z + (Math.random()-0.5)*8
-        );
-        scene.add(dust);
-        
-        gsap.to(dust.position, {
-            x: dust.position.x + (Math.random()-0.5)*25,
-            y: dust.position.y + Math.random()*15,
-            z: dust.position.z + (Math.random()-0.5)*25,
-            duration: 1 + Math.random() * 0.5,
-            ease: "power2.out"
-        });
-        
-        gsap.to(dust.material, {
-            opacity: 0,
-            duration: 1 + Math.random() * 0.5,
-            ease: "power2.out",
-            onComplete: () => { scene.remove(dust); }
-        });
-        
-        gsap.to(dust.rotation, {
-            x: Math.random() * Math.PI * 4,
-            y: Math.random() * Math.PI * 4,
-            duration: 1 + Math.random() * 0.5
-        });
+
+    for (let i = 0; i < dustCount; i++) {
+      const dust = new THREE.Mesh(dustGeo, dustMat);
+      // Start near his feet
+      dust.position.set(
+        masConf.fox.x + (Math.random() - 0.5) * 8,
+        masConf.fox.y,
+        masConf.fox.z + (Math.random() - 0.5) * 8
+      );
+      scene.add(dust);
+
+      gsap.to(dust.position, {
+        x: dust.position.x + (Math.random() - 0.5) * 25,
+        y: dust.position.y + Math.random() * 15,
+        z: dust.position.z + (Math.random() - 0.5) * 25,
+        duration: 1 + Math.random() * 0.5,
+        ease: "power2.out"
+      });
+
+      gsap.to(dust.material, {
+        opacity: 0,
+        duration: 1 + Math.random() * 0.5,
+        ease: "power2.out",
+        onComplete: () => { scene.remove(dust); }
+      });
+
+      gsap.to(dust.rotation, {
+        x: Math.random() * Math.PI * 4,
+        y: Math.random() * Math.PI * 4,
+        duration: 1 + Math.random() * 0.5
+      });
     }
   }
 
   function triggerWinnerText() {
-      const letters = document.querySelectorAll('.winner-letter');
-      if(letters.length === 0) return;
-      
-      // Set initial random positions
-      letters.forEach(letter => {
-          gsap.set(letter, {
-              x: (Math.random() - 0.5) * window.innerWidth * 2,
-              y: (Math.random() - 0.5) * window.innerHeight * 2,
-              rotation: (Math.random() - 0.5) * 720,
-              scale: 5 + Math.random() * 5,
-              opacity: 0
-          });
-      });
+    const letters = document.querySelectorAll('.winner-letter');
+    if (letters.length === 0) return;
 
-      // Animate them converging to their final position one by one
-      gsap.to(letters, {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          scale: 1,
-          opacity: 1,
-          duration: 1.5,
-          ease: "power4.out",
-          stagger: 0.15
+    // Set initial random positions
+    letters.forEach(letter => {
+      gsap.set(letter, {
+        x: (Math.random() - 0.5) * window.innerWidth * 2,
+        y: (Math.random() - 0.5) * window.innerHeight * 2,
+        rotation: (Math.random() - 0.5) * 720,
+        scale: 5 + Math.random() * 5,
+        opacity: 0
       });
+    });
+
+    // Animate them converging to their final position one by one
+    gsap.to(letters, {
+      x: 0,
+      y: 0,
+      rotation: 0,
+      scale: 1,
+      opacity: 1,
+      duration: 1.5,
+      ease: "power4.out",
+      stagger: 0.15
+    });
   }
 
   // Cinematic Entrance Jump
   sherlockGroup.position.set(layout.jumpStartX, 100, 50); // Start top-left
   sherlockGroup.rotation.z = Math.PI / 2; // Tilted sideways during fall
-  
+
   gsap.to(sherlockGroup.position, {
-      x: masConf.fox.x,
-      y: masConf.fox.y,
-      z: masConf.fox.z,
-      duration: 1.5,
-      ease: "power3.in",
-      onComplete: () => {
-          triggerLandingDust();
-          triggerWinnerText();
-          // Camera Impact Shake
-          const origCamY = engine.camera.position.y;
-          gsap.fromTo(engine.camera.position, 
-              { y: origCamY - 4 }, 
-              { y: origCamY, duration: 0.8, ease: "elastic.out(1.5, 0.2)" }
-          );
-      }
+    x: masConf.fox.x,
+    y: masConf.fox.y,
+    z: masConf.fox.z,
+    duration: 1.5,
+    ease: "power3.in",
+    onComplete: () => {
+      triggerLandingDust();
+      triggerWinnerText();
+      // Camera Impact Shake
+      const origCamY = engine.camera.position.y;
+      gsap.fromTo(engine.camera.position,
+        { y: origCamY - 4 },
+        { y: origCamY, duration: 0.8, ease: "elastic.out(1.5, 0.2)" }
+      );
+    }
   });
 
   gsap.to(sherlockGroup.rotation, {
-      z: 0,
-      duration: 1.5,
-      ease: "power2.inOut"
+    z: 0,
+    duration: 1.5,
+    ease: "power2.inOut"
   });
   const loadingScreen = document.getElementById("loadingScreen");
   if (loadingScreen && window.gsap) {
@@ -578,7 +581,7 @@ function triggerCinematicFinale(leaderboard) {
       setTimeout(() => {
         const winner = leaderboard[0];
         if (!winner) return;
-        
+
         const modalName = document.getElementById("winnerModalName");
         if (modalName) modalName.innerText = "CHAMPION: " + winner.name;
         const modalScore = document.getElementById("winnerModalScore");
