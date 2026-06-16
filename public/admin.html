@@ -1138,6 +1138,35 @@
         .leaderboard-row.rank-2 .player-rank { color: #94a3b8; }
         .leaderboard-row.rank-3 .player-rank { color: #d97706; }
 
+        /* ---- Mobile Header Fixes ---- */
+        @media (max-width: 900px) {
+            .main-content header {
+                flex-direction: column !important;
+                height: auto !important;
+                padding: 15px 10px !important;
+                gap: 15px !important;
+            }
+            .main-content header > div:first-child {
+                position: absolute !important;
+                top: 15px !important;
+                left: 15px !important;
+            }
+            .main-content header > div.header-title-group {
+                margin-top: 5px !important;
+                flex-direction: column !important;
+                gap: 5px !important;
+            }
+            .main-content header > div.header-title-group h1 {
+                font-size: 1.2rem !important;
+                margin: 0 !important;
+            }
+            .main-content header > div:last-child {
+                position: relative !important;
+                right: auto !important;
+                width: 100% !important;
+                justify-content: center !important;
+            }
+        }
     </style>
 </head>
 
