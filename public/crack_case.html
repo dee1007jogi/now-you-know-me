@@ -10,8 +10,8 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-            color: #e2e8f0;
+            background: #f8fafc;
+            color: #334155;
             font-family: 'Roboto', sans-serif;
             display: flex;
             align-items: center;
@@ -58,10 +58,10 @@
 
         /* Panels */
         .target-panel, .select-panel {
-            background: rgba(15, 23, 42, 0.92);
+            background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
             border-radius: 20px;
-            border: 1px solid rgba(148, 163, 184, 0.25);
+            border: 1px solid rgba(255, 255, 255, 1);
             padding: 28px 22px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             flex: 1;
@@ -75,7 +75,7 @@
         .panel-title {
             font-family: 'Playfair Display', serif;
             font-size: 26px;
-            color: #facc15;
+            color: #0f172a;
             margin-bottom: 24px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -98,8 +98,8 @@
             font-size: 15.5px;
         }
 
-        .clue-label { color: #94a3b8; font-weight: 500; }
-        .clue-value { color: #fff; font-weight: 700; text-align: right; }
+        .clue-label { color: #64748b; font-weight: 500; }
+        .clue-value { color: #0f172a; font-weight: 700; text-align: right; }
 
         /* 3D Card */
         .card-container {
@@ -139,10 +139,11 @@
         }
 
         .suspect-card {
-            background: rgba(255,255,255,0.95);
-            color: #111;
+            background: #ffffff;
+            color: #0f172a;
             border-radius: 16px;
             padding: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -155,7 +156,8 @@
 
         .suspect-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 15px 25px rgba(249, 166, 0, 0.35);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
         }
 
         .suspect-card.selected {
@@ -166,7 +168,7 @@
         .suspect-avatar {
             width: 100%;
             aspect-ratio: 1;
-            background: #1e2937;
+            background: #f1f5f9;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -369,7 +371,7 @@
                 <!-- Suspect cards injected here automatically -->
             </div>
 
-            <button class="submit-btn" id="submitMatchBtn" disabled onclick="submitSelectedMatch()">
+            <button class="btn-3d-cyan" id="submitMatchBtn" disabled onclick="submitSelectedMatch()" style="width: 100%; margin-top: 12px; font-size: 17px;">
                 SUBMIT MATCH
             </button>
         </div>
@@ -391,10 +393,10 @@
             <p id="resultModalText" style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 30px;">Analyzing your guess...</p>
             
             <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
-                <button class="submit-btn hidden" id="btnCancel" style="flex: 1; min-width: 120px; background: #475569; position: static; transform: none; border-radius: 12px; padding: 14px;">CANCEL</button>
-                <button class="submit-btn hidden" id="btnCrack" style="flex: 2; min-width: 180px; background: linear-gradient(90deg, #d97706, #fbbf24); position: static; transform: none; border-radius: 12px; padding: 14px;">CRACK THE CASE</button>
-                <button class="submit-btn hidden" id="btnCamera" style="flex: 1; min-width: 200px; background: linear-gradient(90deg, #10b981, #059669); position: static; transform: none; border-radius: 12px; padding: 14px;">TAKE SELFIE 📸</button>
-                <button class="submit-btn hidden" id="btnNext" style="flex: 1; min-width: 200px; background: linear-gradient(90deg, #3b82f6, #2563eb); position: static; transform: none; border-radius: 12px; padding: 14px;">CONTINUE</button>
+                <button class="btn-3d-cyan btn-3d-grey hidden" id="btnCancel" style="flex: 1; min-width: 120px;">CANCEL</button>
+                <button class="btn-3d-cyan hidden" id="btnCrack" style="flex: 2; min-width: 180px;">CRACK THE CASE</button>
+                <button class="btn-3d-cyan hidden" id="btnCamera" style="flex: 1; min-width: 200px;">TAKE SELFIE 📸</button>
+                <button class="btn-3d-cyan hidden" id="btnNext" style="flex: 1; min-width: 200px;">CONTINUE</button>
             </div>
         </div>
     </div>
@@ -405,8 +407,8 @@
         <canvas id="cameraCanvas" style="display: none;"></canvas>
         
         <div style="position: absolute; bottom: 40px; display: flex; gap: 20px;">
-            <button onclick="closeCamera()" style="background: rgba(255,255,255,0.2); border: 2px solid white; color: white; padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; backdrop-filter: blur(5px);">CANCEL</button>
-            <button onclick="takeSnapshot()" style="background: white; border: none; color: black; padding: 15px 40px; border-radius: 30px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">📸 CAPTURE</button>
+            <button class="btn-3d-cyan btn-3d-grey" onclick="closeCamera()">CANCEL</button>
+            <button class="btn-3d-cyan" onclick="takeSnapshot()">📸 CAPTURE</button>
         </div>
     </div>
 

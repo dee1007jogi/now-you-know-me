@@ -69,6 +69,18 @@ window.initPlayerGame = function () {
         }
     }
 
+    // Add central table and right corner plant
+    if (window.createDesk) {
+        window.createDesk(0, 45); // Bring the table closer to the camera (camera is at z=75)
+    }
+    if (window.createUltraLushPlant) {
+        // Place plant in the right corner of the room and scale it down
+        const plant = window.createUltraLushPlant(engine.scene, 35, -2.5, 35);
+        if (plant) {
+            plant.scale.set(0.5, 0.5, 0.5); // Make the plant smaller
+        }
+    }
+
     // Build the questions board
     initBoard();
 
@@ -96,6 +108,7 @@ function initBoard() {
     // Set to the center wall
     boardMesh.position.set(0, 7, boardConfig.z);
     boardMesh.userData.noHoverScale = true;
+    boardMesh.visible = false;
     engine.scene.add(boardMesh);
 
     // Make Board Interactive (Click + Hover)
@@ -277,20 +290,21 @@ let currentQuestionIndex = 0;
 let userAnswers = {};
 
 const questions = [
-    { id: "workStyle", text: "What is your work style? 💼", options: ["Deep focus", "Collaborative", "Structured", "Flexible"], icons: ["🧘‍♂️", "🤝", "📐", "🌊"] },
-    { id: "teamRole", text: "What's your secret team role? 🧩", options: ["Planner", "Problem-solver", "Creative", "Calm anchor"], icons: ["📅", "🛠️", "🎨", "⚓"] },
-    { id: "meetingPower", text: "Your meeting superpower is... ⚡", options: ["Summarizing", "Asking sharp questions", "Spotting risks", "Keeping energy up"], icons: ["📝", "💡", "🛡️", "🎉"] },
-    { id: "breakStyle", text: "Your ideal office break? ☕", options: ["Coffee chat", "Quiet time", "Short walk", "Music"], icons: ["☕", "🤫", "🚶", "🎧"] },
-    { id: "updatesVia", text: "How do you prefer updates? 📱", options: ["Email", "WhatsApp", "Call", "In-person"], icons: ["📧", "🟢", "📞", "🤝"] },
-    { id: "recharge", text: "How do you recharge? 🔋", options: ["People", "Solo time", "Exercise", "Entertainment"], icons: ["👩‍👩‍👦", "🧘", "🏃", "🎬"] },
+    { id: "workStyle", text: "What is your work style? 💻", type: "text" },
+    { id: "teamRole", text: "What is your team role? 👥", type: "text" },
+    { id: "meetingPower", text: "What is your meeting superpower? ⚡", type: "text" },
+    { id: "breakStyle", text: "What is your ideal break? ☕", type: "text" },
+    { id: "updatesVia", text: "How do you prefer updates? 📢", type: "text" },
+    { id: "recharge", text: "How do you recharge? 🔋", type: "text" },
+    { id: "morningFuel", text: "What is your morning fuel? 🍳", type: "text" },
+    { id: "workspaceQuirk", text: "What is your workspace quirk? 🪴", type: "text" },
+    { id: "weekendRoutine", text: "What is your weekend routine? 🏃", type: "text" },
     { id: "surprisingSkill", text: "And finally... one surprising skill? ✨", type: "text" }
 ];
 
 /* ---- APP LOGIC ---- */
 
 async function transitionTo(stageName) {
-    if (engineReadyPromise) await engineReadyPromise; // Ensure mascots exist before moving them
-
     Object.values(stages).filter(s => s).forEach(s => s.classList.add("hidden"));
     if (stages[stageName]) stages[stageName].classList.remove("hidden");
 
@@ -323,6 +337,9 @@ async function transitionTo(stageName) {
             updateBoardText("Answers saved! Waiting for admin to start... ⏳");
         }
 
+        // Wait for mascots to be loaded before trying to move them
+        if (window.engineReadyPromise) await window.engineReadyPromise;
+
     // Reset Mascots to Office Positions (Questions Page Style)
         if (window._mascots) {
             let activeTargetConfig = playerTargetConfig;
@@ -342,6 +359,31 @@ async function transitionTo(stageName) {
                     gsap.to(m.model.position, { x: target.pos.x, y: target.pos.y, z: target.pos.z, duration: 2, ease: "power2.inOut", overwrite: "auto" });
                     gsap.to(m.model.rotation, { y: target.rot || 0, duration: 2, ease: "power2.inOut", overwrite: "auto" });
                     gsap.to(m.model.scale, { x: target.scale, y: target.scale, z: target.scale, duration: 2, ease: "power2.inOut", overwrite: "auto" });
+                }
+            }
+
+            // Special Animation for Waiting Stage
+            if (stageName === "waiting" && window._mascots['bunny']) {
+                const bunny = window._mascots['bunny'].model;
+                if (!bunny.userData.isWaitingMoved) {
+                    bunny.userData.isWaitingMoved = true;
+                    // Move Bunny (woman) to the far left side
+                    gsap.to(bunny.position, { x: -15, y: 1.5, z: 50, duration: 2.5, ease: "power2.inOut", overwrite: "auto" });
+                    
+                    // Ensure she looks slightly towards the center
+                    gsap.to(bunny.rotation, { y: 0.3, duration: 2.5, ease: "power2.inOut", overwrite: "auto" });
+
+                    // Fix her scale so she doesn't use the zoomed-in questions scale
+                    gsap.to(bunny.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 2.5, ease: "power2.inOut", overwrite: "auto" });
+                    
+                    // Make her speak
+                    setTimeout(() => {
+                        if (window.showDialogue) {
+                            window.showDialogue(bunny, "Agent Bunny", "Waiting for admin to start the game ⏳", 999, "right");
+                        } else {
+                            console.warn("showDialogue not ready!");
+                        }
+                    }, 2500);
                 }
             }
         }
@@ -413,6 +455,19 @@ function renderQuestion() {
     const qCard = document.getElementById("qCard");
 
     if (q.type === "text") {
+        const textTitle = document.getElementById("textQuestionTitle");
+        const textInput = document.getElementById("textQuestionInput");
+        const textBtn = document.getElementById("textQuestionSubmitBtn");
+        
+        if (textTitle) textTitle.innerText = q.text;
+        if (textInput) {
+            textInput.value = "";
+            textInput.placeholder = "Type your answer... ✨";
+        }
+        if (textBtn) {
+            textBtn.innerText = currentQuestionIndex < questions.length - 1 ? "Next ✨" : "Submit Answers ✨";
+        }
+
         if (textInputWrap) {
             textInputWrap.classList.remove("hidden");
             // Beautiful popup animation
@@ -433,6 +488,7 @@ function renderQuestion() {
             qCard.style.pointerEvents = "auto";
             qCard.style.boxShadow = "";
         }
+
     } else {
         if (qCard) {
             qCard.style.background = "transparent";
@@ -496,27 +552,60 @@ function selectOption(qId, value) {
 
 
 
-document.getElementById("submitAnswersBtn").onclick = async () => {
-    const skill = document.getElementById("surprisingSkill").value.trim();
-    if (!skill) return alert("Tell us your surprising skill! 🐰");
+document.getElementById("textQuestionSubmitBtn").onclick = async () => {
+    const q = questions[currentQuestionIndex];
+    const inputEl = document.getElementById("textQuestionInput");
+    const val = inputEl.value.trim();
+    if (!val) return alert("Please enter your answer! 🐰");
 
-    userAnswers.surprisingSkill = skill;
-    const btn = document.getElementById("submitAnswersBtn");
-    btn.innerText = "⏳ Saving...";
-    btn.disabled = true;
+    userAnswers[q.id] = val;
 
-    try {
-        console.log("Submitting answers for:", playerId);
-        const res = await fetch("/api/submit-answers", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ playerId, answers: userAnswers })
+    // 1. MASCOT CELEBRATION
+    if (mascots.owl) {
+        const owl = mascots.owl.model;
+        gsap.to(owl.rotation, { y: "+=12.56", duration: 1, ease: "power2.inOut" }); // Majestic spin
+    }
+    if (mascots.bunny) {
+        const bunny = mascots.bunny.model;
+        gsap.to(bunny.position, { y: 3.5, duration: 0.3, yoyo: true, repeat: 1, ease: "power1.out" });
+    }
+    if (mascots.fox && mascots.fox.model.scale.x > 0.1) {
+        const fox = mascots.fox.model;
+        gsap.to(fox.scale, { x: 4.5, y: 4.5, z: 4.5, duration: 0.2, yoyo: true, repeat: 1 });
+    }
+
+    // 2. BOARD FEEDBACK
+    if (boardMesh) {
+        gsap.to(boardMesh.scale, { x: 1.05, y: 1.05, duration: 0.1, yoyo: true, repeat: 1 });
+    }
+
+    // 3. ADVANCE TO NEXT QUESTION OR SUBMIT
+    if (currentQuestionIndex < questions.length - 1) {
+        gsap.to("#textInputWrap", {
+            opacity: 0, scale: 0.9, duration: 0.3,
+            onComplete: () => {
+                currentQuestionIndex++;
+                renderQuestion();
+                gsap.to("#textInputWrap", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" });
+            }
         });
+    } else {
+        const btn = document.getElementById("textQuestionSubmitBtn");
+        btn.innerText = "⏳ Saving...";
+        btn.disabled = true;
 
-        if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.error || "Submit Failed");
-        }
+        try {
+            console.log("Submitting answers for:", playerId);
+            const res = await fetch("/api/submit-answers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ playerId, answers: userAnswers })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || "Submit Failed");
+            }
 
         // Update local state immediately so checkShowWaiting can transition even before socket update
         if (!currentUserData) currentUserData = { id: playerId };
@@ -535,13 +624,20 @@ document.getElementById("submitAnswersBtn").onclick = async () => {
         updateBoardText("Answers saved! Waiting for admin to start... ⏳");
 
         checkShowWaiting();
-    } catch (e) {
-        console.error("Submit error:", e);
-        btn.innerText = "Retry Submit";
-        btn.disabled = false;
-        alert("Saving failed: " + e.message + ". Please check your connection.");
+        } catch (err) {
+            console.error("Submit Error:", err);
+            alert("Error: " + err.message);
+            btn.innerText = "Submit Answers ✨";
+            btn.disabled = false;
+        }
     }
 };
+
+document.getElementById("textQuestionInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        document.getElementById("textQuestionSubmitBtn").click();
+    }
+});
 
 function checkShowWaiting() {
     // If we have local answers/photoUrl, we can transition even if socket state hasn't caught up
@@ -549,6 +645,8 @@ function checkShowWaiting() {
     const hasPhoto = (currentUserData && currentUserData.photoUrl) || (currentUserData && currentUserData.photoUrl === "done");
 
     console.log("Checking transition status:", { hasPhoto, hasAnswers, status: appState.status });
+
+    if (!playerId || !window.hasInitedGame) return;
 
     if (!hasAnswers) {
         transitionTo("questions");
@@ -558,6 +656,7 @@ function checkShowWaiting() {
         if (appState.status === "lobby") fireConfetti(20);
     }
 }
+window.checkShowWaiting = checkShowWaiting;
 
 /* ---- SOCKET SYNC ---- */
 socket.on("connect", () => console.log("Connected as", playerId));

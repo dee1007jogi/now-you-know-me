@@ -9,18 +9,51 @@ class WebGLEngine {
         // Three.js Setup
         this.scene = new THREE.Scene();
 
-        // Add some soft Pixar-style lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Brighter ambient
-        this.scene.add(ambientLight);
+        const isTV = window.location.pathname.includes('/tv');
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.0); // Brighter directional
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        this.scene.add(dirLight);
+        if (isTV) {
+            // Original Dark Theme Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            this.scene.add(ambientLight);
 
-        const fillLight = new THREE.PointLight(0xbae6fd, 0.8); // Brighter sky blue fill
-        fillLight.position.set(-10, 0, -10);
-        this.scene.add(fillLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            this.scene.add(dirLight);
+
+            const fillLight = new THREE.PointLight(0xbae6fd, 0.5);
+            fillLight.position.set(-10, 0, -10);
+            this.scene.add(fillLight);
+        } else {
+            // Realistic Office Lighting Setup
+            // Global color correction - REMOVED scene.background to allow CSS skyline to show through
+            this.scene.fog = new THREE.Fog(0xe8f0f8, 50, 150); // Adjusted for larger scene size
+            
+            // 1. Ambient Light (Sky/Bounced light)
+            const ambientLight = new THREE.AmbientLight(0xe0f2fe, 1.5); // Increased to brighten character faces
+            this.scene.add(ambientLight);
+
+            // 2. Main Sun Light (Directional)
+            const dirLight = new THREE.DirectionalLight(0xfff5e6, 2.5); // Warm sun
+            dirLight.position.set(20, 30, 40); // Shining from the front-right to illuminate characters
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.bias = -0.0005;
+            // Expand shadow camera to cover the large 200x200 office space
+            dirLight.shadow.camera.left = -100;
+            dirLight.shadow.camera.right = 100;
+            dirLight.shadow.camera.top = 100;
+            dirLight.shadow.camera.bottom = -100;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 200;
+            this.scene.add(dirLight);
+
+            // 3. Interior Fill/Cove Lighting
+            const fillLight = new THREE.PointLight(0xfffae6, 2.0, 100); // Warm interior fill
+            fillLight.position.set(0, 15, 20);
+            this.scene.add(fillLight);
+        }
 
         this.camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 75; // Balanced depth for cinematic 32 FOV
@@ -34,6 +67,13 @@ class WebGLEngine {
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Performant pixel ratio
+        
+        if (!isTV) {
+            // Realistic Tone Mapping
+            this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            this.renderer.toneMappingExposure = 1.0;
+        }
+        
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.container.appendChild(this.renderer.domElement);

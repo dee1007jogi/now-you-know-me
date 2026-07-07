@@ -3,399 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operation Leaderboard – Now You Know Me</title>
-    <link rel="stylesheet" href="/styles.css?v=3">
-    <link rel="stylesheet" href="/mobile.css?v=3">
+    <title>Leaderboard Slide – Now You Know Me</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Great+Vibes&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --neon-blue: #38bdf8;
-            --neon-cyan: #22d3ee;
-            --gold-bright: #fbbf24;
+            --bg-light: #f2f5f8;
+            --primary-blue: #0ea5e9;
+            --primary-blue-dark: #0284c7;
+            --text-dark: #334155;
+            --text-gray: #94a3b8;
+            --gold: #f59e0b;
         }
 
         body {
-            background: radial-gradient(circle at 50% 50%, #060913 0%, #010204 100%);
-            color: #f8fafc;
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255,255,255,0.8) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(226,232,240,0.5) 0, transparent 50%);
+            margin: 0;
+            padding: 30px 40px;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            margin: 0;
-            font-family: 'Outfit', 'Inter', sans-serif;
-            padding: 30px;
-            overflow-x: hidden;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
             box-sizing: border-box;
-        }
-
-        /* Ambient Glowing Corner Orbs */
-        body::before {
-            content: "";
-            position: fixed;
-            top: -10%;
-            left: -10%;
-            width: 40%;
-            height: 40%;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.06) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        body::after {
-            content: "";
-            position: fixed;
-            bottom: -10%;
-            right: -10%;
-            width: 40%;
-            height: 40%;
-            background: radial-gradient(circle, rgba(192, 132, 252, 0.04) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 15px;
-        }
-
-        .header-title h1 {
-            font-size: 2.2rem;
-            font-weight: 950;
-            margin: 0;
-            background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 20px rgba(56, 189, 248, 0.1);
-        }
-
-        .header-title p {
-            margin: 5px 0 0 0;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        .game-status-pill {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.8rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* 3-Column Command Center Layout */
-        .workspace-grid {
-            display: flex;
-            gap: 25px;
-            flex: 1;
-            min-height: calc(100vh - 130px);
-            height: auto;
-            overflow: visible;
-            box-sizing: border-box;
-        }
-
-        .grid-col {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            backdrop-filter: blur(20px);
-            padding: 25px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
-        /* Col 1: Leaderboard */
-        .col-leaderboard {
-            width: 35%;
+        .header-section {
+            width: 100%;
+            margin-bottom: 30px;
         }
 
-        /* Col 2: Live Selfie Stream */
-        .col-selfies {
-            flex: 1;
-        }
-
-        .column-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
-            flex-shrink: 0;
-        }
-
-        .column-header h3 {
-            margin: 0;
-            font-size: 1.05rem;
+        .header-section h1 {
+            font-size: 2.2rem;
             font-weight: 800;
-            color: var(--gold-bright);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .column-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .column-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .column-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        /* Leaderboard rows custom styling for 2D list */
-        .leaderboard-row {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 16px;
-            padding: 12px 18px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .leaderboard-row:hover, .leaderboard-row.active {
-            background: rgba(56, 189, 248, 0.08);
-            border-color: rgba(56, 189, 248, 0.3);
-            transform: scale(1.01) translateX(5px);
-        }
-
-        .leaderboard-player {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .player-rank {
-            font-weight: 900;
-            font-size: 1rem;
-            color: var(--neon-cyan);
-            width: 25px;
-        }
-
-        .player-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            object-fit: cover;
-        }
-
-        .player-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .player-name {
-            font-weight: 750;
-            font-size: 0.95rem;
-            color: #ffffff;
-        }
-
-        .player-score {
-            font-weight: 900;
-            color: var(--neon-cyan);
-            font-size: 1.1rem;
-        }
-
-        /* Dossier Detail View */
-        .dossier-placeholder {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.3);
-            gap: 15px;
-        }
-
-        .dossier-placeholder span {
-            font-size: 3rem;
-        }
-
-        .dossier-profile {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-
-        .dossier-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            border: 2px solid var(--neon-blue);
-            object-fit: cover;
-        }
-
-        .dossier-name {
-            font-size: 1.5rem;
-            font-weight: 900;
-            margin: 0 0 6px 0;
-            color: white;
-        }
-
-        .dossier-level {
-            display: inline-block;
-            font-size: 0.65rem;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 800;
+            color: #475569;
+            margin: 0 0 5px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .dossier-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+        .header-section p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            margin: 0;
         }
 
-        .dossier-metric-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .dossier-metric-box h6 {
-            margin: 0 0 5px 0;
-            font-size: 0.55rem;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
-            font-weight: 800;
-            letter-spacing: 0.5px;
-        }
-
-        .dossier-metric-val {
-            font-size: 1.15rem;
-            font-weight: 900;
-            font-family: 'Outfit';
-        }
-
-        .dossier-clues {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .dossier-clue-card {
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            padding: 8px 12px;
-        }
-
-        .dossier-clue-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            font-weight: 800;
-            color: var(--neon-cyan);
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .dossier-clue-val {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .dossier-selfies {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px;
-        }
-
-        .dossier-selfie-card {
-            position: relative;
+        .workspace-grid {
+            display: flex;
             width: 100%;
-            aspect-ratio: 1;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: black;
+            height: calc(100vh - 120px);
+            gap: 40px;
         }
 
-        .dossier-selfie-card img {
-            width: 100%;
+        /* --- LEADERBOARD SLIDE (Left 65%) --- */
+        .leaderboard-slide-col {
+            flex: 2.2;
+            display: flex;
+            gap: 30px;
             height: 100%;
-            object-fit: cover;
         }
 
-        .dossier-selfie-vs {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            font-size: 0.6rem;
-            padding: 3px;
-            font-weight: 800;
-            text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* Live Selfie Stream Column */
-        #selfiesStream {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            align-content: start;
-        }
-
-        #selfiesStream > div[style*="padding: 40px"] {
-            grid-column: 1 / -1;
-        }
-
-        .stream-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 20px;
-            overflow: hidden;
+        /* Rank 1 Card */
+        .rank1-card {
+            background: #ffffff;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(251,191,36,0.15) 0px, transparent 60%),
+                radial-gradient(at 100% 100%, rgba(251,191,36,0.15) 0px, transparent 60%);
+            border: 2px solid #fbbf24;
+            outline: 1px solid #d97706;
+            outline-offset: -12px;
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            width: 380px;
+            height: fit-content;
             display: flex;
             flex-direction: column;
-            transition: border-color 0.3s;
+            align-items: center;
+            position: relative;
+            padding: 40px 30px;
+            animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+        }
+
+        .gold-congrats {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.5rem;
+            color: #b45309;
+            margin: 0 0 -5px 0;
+            font-weight: 400;
+        }
+
+        .gold-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #d97706;
+            text-transform: uppercase;
+            margin: 0 0 35px 0;
+            line-height: 1.2;
+            letter-spacing: 1px;
+        }
+
+        .rank1-avatar-container {
+            position: relative;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .rank1-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 0 8px #fde68a, 0 0 0 10px #d97706, 0 15px 30px rgba(0,0,0,0.15);
+            z-index: 2;
+            position: relative;
+        }
+
+        .gold-ribbon-container {
+            position: relative;
+            z-index: 3;
+            margin-top: -45px; /* Overlap avatar */
+            margin-bottom: 25px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+        }
+
+        .gold-ribbon {
+            background: linear-gradient(to bottom, #fde047, #eab308, #ca8a04);
+            padding: 12px 35px;
+            position: relative;
+            color: #1e293b;
+            font-weight: 900;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -2px 5px rgba(0,0,0,0.2);
+            border: 1px solid #a16207;
+        }
+        
+        .gold-ribbon::before, .gold-ribbon::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            z-index: -1;
+            border: 22px solid #854d0e;
+        }
+        .gold-ribbon::before {
+            left: -30px;
+            border-left-color: transparent;
+        }
+        .gold-ribbon::after {
+            right: -30px;
+            border-right-color: transparent;
+        }
+
+        .gold-message {
+            font-size: 0.95rem;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            padding: 0 15px;
+            font-weight: 600;
+        }
+
+        .gold-score-pill {
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+            border: 2px solid #fef08a;
+            display: inline-block;
+        }
+
+        /* Ranking List */
+        .list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .list-row {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 35px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            height: 70px;
+            position: relative;
+            animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            flex-shrink: 0;
+        }
+
+        .list-rank {
+            width: 70px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-align: center;
+        }
+
+        .list-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: absolute;
+            left: 60px;
+            z-index: 2;
+        }
+
+        .list-info {
+            margin-left: 70px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .list-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .list-role {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin: 0;
+        }
+
+        .list-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            margin-right: 20px;
+        }
+
+        .list-stars {
+            color: #cbd5e1;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        
+        .list-stars.gold {
+            color: var(--gold);
+        }
+
+        .list-time {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            font-weight: 600;
+        }
+
+        .list-score-box {
+            background: linear-gradient(to right, #38bdf8, #0ea5e9);
+            height: 100%;
+            min-width: 90px;
+            border-radius: 0 35px 35px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: -4px 0 12px rgba(14, 165, 233, 0.2);
+        }
+        
+        .list-row:nth-child(even) .list-score-box {
+            background: linear-gradient(to right, #14b8a6, #0d9488);
+            box-shadow: -4px 0 12px rgba(13, 148, 136, 0.2);
+        }
+
+        .list-score-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .list-score {
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+
+        /* --- SELFIE FEED (Right 35%) --- */
+        .selfie-feed-col {
+            flex: 1.2;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .selfie-feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .selfie-feed-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .selfie-count {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .stream-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .stream-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .stream-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Instagram Style Stream Card */
+        .stream-card {
+            background: #ffffff;
+            border: 1px solid #dbdbdb;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .ig-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+        }
+        
+        .ig-avatar-ring {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 2px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .ig-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            object-fit: cover;
+            box-sizing: border-box;
+        }
+        
+        .ig-username {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #262626;
+            flex-grow: 1;
         }
 
         .stream-img-container {
             width: 100%;
-            height: 180px;
+            aspect-ratio: 1; /* Instagram square */
+            background: #fafafa;
             position: relative;
-            background: #000;
+            overflow: hidden;
+            border-top: 1px solid #efefef;
+            border-bottom: 1px solid #efefef;
         }
 
         .stream-img-container img {
@@ -404,310 +431,222 @@
             object-fit: cover;
         }
 
-        .stream-badges {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            right: 8px;
+        .ig-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 12px 15px 8px 15px;
+            color: #262626;
+        }
+        
+        .ig-action-left {
+            display: flex;
+            gap: 16px;
+        }
+
+        .ig-caption-area {
+            padding: 0 15px 15px 15px;
+            font-size: 0.9rem;
+            color: #262626;
+        }
+        
+        .ig-likes {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .ig-caption {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .ig-caption strong {
+            font-weight: 700;
+        }
+        
+        .ig-comments-link {
+            color: #8e8e8e;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .ig-timestamp {
+            color: #8e8e8e;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stream-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .stream-badge {
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
             font-weight: 800;
-            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .badge-correct { background: rgba(16, 185, 129, 0.9); color: white; border: 1px solid #34d399; }
+        .badge-wrong { background: rgba(239, 68, 68, 0.9); color: white; border: 1px solid #f87171; }
+        .badge-pts { background: rgba(245, 158, 11, 0.9); color: white; border: 1px solid #fbbf24; }
+
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .badge-correct {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-            border-color: rgba(16, 185, 129, 0.3);
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        .badge-wrong {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.3);
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .badge-pts {
-            background: rgba(251, 191, 36, 0.15);
-            color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.3);
-        }
-
-        .stream-info {
-            padding: 12px 15px;
-        }
-
-        .stream-players {
-            font-size: 0.85rem;
-            font-weight: 750;
-            color: #ffffff;
-            margin-bottom: 4px;
-        }
-
-        .stream-players span {
-            color: var(--neon-cyan);
-            font-weight: 900;
-        }
-
-        .stream-time {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-weight: 600;
-        }
-
+        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 1024px) {
+            body {
+                height: auto;
+                overflow: auto;
+                padding: 15px;
+            }
+            .header-section {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
             .workspace-grid {
                 flex-direction: column;
                 height: auto;
-                overflow: visible;
+                gap: 20px;
             }
-            .grid-col {
-                width: 100% !important;
-                height: 450px !important;
-            }
-        }
-
-        /* Mobile specific fixes (<= 600px) */
-        @media (max-width: 600px) {
-            body { 
-                padding: 15px; 
-            }
-            .header-section {
+            .leaderboard-slide-col {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
+                gap: 20px;
+                height: auto;
             }
-            .header-title h1 {
-                font-size: 1.6rem;
-                line-height: 1.2;
-            }
-            .header-title p {
-                font-size: 0.75rem;
-                word-break: break-word;
-                white-space: normal;
-                line-height: 1.4;
-            }
-            .game-status-pill {
-                align-self: flex-start;
-                padding: 6px 14px;
-            }
-            .leaderboard-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 16px;
-                margin-bottom: 12px;
-            }
-            .leaderboard-player {
-                align-items: flex-start;
+            .rank1-card {
                 width: 100%;
+                box-sizing: border-box;
+                padding-bottom: 25px;
             }
-            .player-name {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 6px;
-                white-space: normal;
-                word-break: break-word;
+            .list-container {
+                max-height: 500px;
+                overflow-y: auto;
             }
-            .player-name span {
-                margin-left: 0 !important;
-            }
-            .player-score {
-                margin-left: 95px; /* Aligns with player name */
-                font-size: 1.3rem;
-            }
-            .grid-col {
-                height: auto !important;
+            .selfie-feed-col {
                 max-height: 600px;
-            }
-            #leaderboardSort {
-                font-size: 0.9rem !important;
-                padding: 8px 12px !important;
+                height: auto;
             }
         }
 
-        .column-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .column-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .column-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <div class="header-section" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
-        <div class="header-title" style="text-align: center;">
-            <h1>📊 LEADERBOARD</h1>
-            <p>Intelligence Leaderboard & Live Investigation Feed</p>
-        </div>
-        <div class="game-status-pill" style="position: absolute; top: 15px; right: 0;">
-            <span>Status:</span>
-            <strong id="gameStatusText" style="color: var(--gold-bright);">LOBBY ⏳</strong>
-        </div>
+    <div class="header-section">
+        <h1 id="pageTitle">Leaderboard Slide</h1>
+        <p id="pageSubtitle">Final intelligence rankings for current operation.</p>
     </div>
 
-    <!-- 3-Column Split View -->
     <div class="workspace-grid">
+        
+        <!-- LEADERBOARD SLIDE AREA (Left side) -->
+        <div class="leaderboard-slide-col">
+            <!-- Rank 1 Card -->
+            <div id="rank1Container"></div>
 
-        <!-- Column 1: Leaderboard Ranking -->
-        <div class="grid-col col-leaderboard">
-            <div class="column-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>📊 Ranking List</h3>
-                    <span id="playerCountText" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 800;">0 Agents</span>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select id="leaderboardSort" onchange="handleSortChange()" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 5px 10px; font-size: 0.8rem; font-family: 'Outfit'; flex: 1; outline: none; cursor: pointer;">
-                        <option value="score_desc" style="background: #0f172a;">Highest Score</option>
-                        <option value="score_asc" style="background: #0f172a;">Lowest Score</option>
-                        <option value="selfies_desc" style="background: #0f172a;">Most Selfies</option>
-                        <option value="selfies_asc" style="background: #0f172a;">Least Selfies</option>
-                    </select>
-                </div>
-            </div>
-            <div id="leaderboardList" class="column-scroll">
-                <div style="padding: 40px; text-align: center; opacity: 0.3;">
-                    Waiting for agents to join the network...
-                </div>
-            </div>
+            <!-- Ranking List -->
+            <div id="rankingListContainer" class="list-container"></div>
         </div>
 
-        <!-- Column 2: Live Selfie Stream -->
-        <div class="grid-col col-selfies">
-            <div class="column-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>📸 Live Selfie Feed</h3>
-                    <span id="selfiesCountText" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 800;">0 Snaps</span>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Filter by: <strong id="currentSelfieFilter" style="color: var(--neon-cyan);">All Players</strong></span>
-                    <button onclick="clearSelfieFilter()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: none;" id="clearFilterBtn">CLEAR FILTER</button>
-                </div>
+        <!-- SELFIE FEED AREA (Right side) -->
+        <div class="selfie-feed-col">
+            <div class="selfie-feed-header">
+                <h2>Live Selfie Feed</h2>
+                <span id="selfiesCountText" class="selfie-count">0 Snaps</span>
             </div>
-            <div id="selfiesStream" class="column-scroll">
-                <div style="padding: 40px; text-align: center; opacity: 0.3;">
-                    Waiting for selfies to stream...
-                </div>
-            </div>
+            <div id="selfiesStream" class="stream-container"></div>
         </div>
 
     </div>
 
-    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let appState = null;
-        let selectedPlayerId = null;
-        let currentSort = "score_desc";
 
-        function handleSortChange() {
-            currentSort = document.getElementById("leaderboardSort").value;
-            renderLeaderboardList();
+        function getOrdinal(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+        
+        function formatTime(seconds) {
+            if (seconds === null || seconds === undefined) return "-- min";
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}.${s.toString().padStart(2, '0')}min`;
         }
 
-        function clearSelfieFilter() {
-            selectedPlayerId = null;
-            document.querySelectorAll(".leaderboard-row").forEach(r => r.classList.remove("active"));
-            document.getElementById("currentSelfieFilter").innerText = "All Players";
-            document.getElementById("clearFilterBtn").style.display = "none";
-            renderSelfieStream();
-        }
-
-        // Dynamic rank calculation matching profile rules
         function getInteractionLevel(p, selfiesCount) {
             const score = p.score || 0;
             const speed = p.avgCorrectSec;
             const correct = p.correct || 0;
             
             if (score >= 400 || (correct >= 4 && speed !== null && speed <= 25)) {
-                return {
-                    text: "Elite Investigator 🎖️",
-                    color: "#c084fc",
-                    bg: "rgba(192, 132, 252, 0.15)",
-                    border: "1px solid rgba(192, 132, 252, 0.3)"
-                };
+                return "Elite Investigator";
             } else if (selfiesCount >= 3 || correct >= 3) {
-                return {
-                    text: "Social Matchmaker 🤝",
-                    color: "#22d3ee",
-                    bg: "rgba(34, 211, 238, 0.15)",
-                    border: "1px solid rgba(34, 211, 238, 0.3)"
-                };
+                return "Social Matchmaker";
             } else if (speed !== null && speed <= 20) {
-                return {
-                    text: "Speedy Detective ⚡",
-                    color: "#f59e0b",
-                    bg: "rgba(245, 158, 11, 0.15)",
-                    border: "1px solid rgba(245, 158, 11, 0.3)"
-                };
+                return "Speedy Detective";
             } else if (correct > 0) {
-                return {
-                    text: "Steady Observer 🔍",
-                    color: "#10b981",
-                    bg: "rgba(16, 185, 129, 0.15)",
-                    border: "1px solid rgba(16, 185, 129, 0.3)"
-                };
+                return "Steady Observer";
             } else {
-                return {
-                    text: "Fresh Recruit 🕵️",
-                    color: "#94a3b8",
-                    bg: "rgba(148, 163, 184, 0.15)",
-                    border: "1px solid rgba(148, 163, 184, 0.3)"
-                };
+                return "Fresh Recruit";
             }
         }
 
-        // On connection
         socket.on("connect", () => {
             console.log("Connected to Real-time Leaderboard.");
         });
 
-        // On state synchronization
         socket.on("state", (state) => {
             appState = state;
+            
+            if (appState.status === "lobby") {
+                document.getElementById("pageSubtitle").innerText = "Waiting for agents to join the lobby...";
+            } else if (appState.status === "live") {
+                document.getElementById("pageSubtitle").innerText = "Operation in progress! Live ranking updates.";
+            } else {
+                document.getElementById("pageSubtitle").innerText = "Operation complete! Final standings.";
+            }
 
-            // Status Update
-            const statusLabels = { lobby: "Lobby ⏳", live: "Live 🟢", ended: "Ended 🏁" };
-            const statusEl = document.getElementById("gameStatusText");
-            statusEl.innerText = statusLabels[state.status] || state.status;
-            statusEl.style.color = state.status === "live" ? "#10b981" : (state.status === "ended" ? "#ef4444" : "#fbbf24");
-
-            // Players Count
-            document.getElementById("playerCountText").innerText = `${state.playersCount || 0} Agents`;
-
-            // Render Leaderboard list
-            renderLeaderboardList();
-
-            // Render live selfie stream (chronological)
+            renderLeaderboard();
             renderSelfieStream();
         });
 
-        // 1. Render Left Column (Leaderboard)
-        function renderLeaderboardList() {
-            const container = document.getElementById("leaderboardList");
-            container.innerHTML = "";
+        function renderLeaderboard() {
+            const rank1Container = document.getElementById("rank1Container");
+            const listContainer = document.getElementById("rankingListContainer");
 
             if (!appState || !appState.leaderboard || appState.leaderboard.length === 0) {
-                container.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.3; color:white;">Waiting for agents to join...</div>`;
+                rank1Container.innerHTML = "";
+                listContainer.innerHTML = "<div style='text-align:center; padding: 40px; color: var(--text-gray);'>No agents in the system yet.</div>";
                 return;
             }
 
@@ -716,134 +655,129 @@
                 return appState.selfies.filter(s => s.playerId === pid).length;
             };
 
-            let sortedLeaderboard = [...appState.leaderboard];
-            sortedLeaderboard.sort((a, b) => {
-                if (currentSort === "score_desc") return (b.score || 0) - (a.score || 0);
-                if (currentSort === "score_asc") return (a.score || 0) - (b.score || 0);
-                if (currentSort === "selfies_desc") return getSelfieCount(b.id) - getSelfieCount(a.id);
-                if (currentSort === "selfies_asc") return getSelfieCount(a.id) - getSelfieCount(b.id);
-                return 0;
-            });
+            let sorted = [...appState.leaderboard];
+            sorted.sort((a, b) => (b.score || 0) - (a.score || 0));
 
-            sortedLeaderboard.forEach((p, i) => {
-                const row = document.createElement("div");
-                row.className = `leaderboard-row animate-pop ${p.id === selectedPlayerId ? 'active' : ''}`;
-                row.onclick = () => {
-                    // Toggle active styles locally
-                    if (selectedPlayerId === p.id) {
-                        selectedPlayerId = null;
-                        row.classList.remove("active");
-                    } else {
-                        document.querySelectorAll(".leaderboard-row").forEach(r => r.classList.remove("active"));
-                        row.classList.add("active");
-                        selectedPlayerId = p.id;
-                    }
-
-                    const filterText = selectedPlayerId ? (p.name || 'Anonymous Intelligence') : "All Players";
-                    document.getElementById("currentSelfieFilter").innerText = filterText;
-                    document.getElementById("clearFilterBtn").style.display = selectedPlayerId ? "block" : "none";
-
-                    renderSelfieStream();
-                };
-
-                let lobbyStatusBadge = "";
-                if (appState.status === "lobby") {
-                    const status = getPlayerLobbyStatus(p);
-                    lobbyStatusBadge = `
-                        <span style="font-size:0.6rem; padding:2px 6px; border-radius:6px; font-weight:800; text-transform:uppercase; color:${status.color}; background:${status.bg}; border:${status.border}; margin-left:8px; display:inline-block; vertical-align:middle; letter-spacing:0.5px;">
-                            ${status.text}
-                        </span>
-                    `;
-                }
-
-                row.innerHTML = `
-                    <div class="leaderboard-player">
-                        <span class="player-rank">#${i + 1}</span>
-                        <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="player-avatar" / loading="lazy">
-                        <div class="player-info">
-                            <span class="player-name">${p.name || 'Anonymous Intelligence'} ${lobbyStatusBadge}</span>
-                        </div>
+            // Render 1st Place
+            const p1 = sorted[0];
+            const p1Selfies = getSelfieCount(p1.id);
+            const p1Role = getInteractionLevel(p1, p1Selfies);
+            
+            rank1Container.innerHTML = `
+                <div class="rank1-card">
+                    <h2 class="gold-congrats">Congratulation</h2>
+                    <div class="gold-title">Top Intelligence<br/>Agent</div>
+                    
+                    <div class="rank1-avatar-container">
+                        <img src="${p1.photoUrl || '/assets/detective_sketch.png'}" class="rank1-avatar" />
                     </div>
-                    <span class="player-score">${p.score || 0} <span>pts</span></span>
-                `;
+                    
+                    <div class="gold-ribbon-container">
+                        <div class="gold-ribbon">${p1.name || 'Anonymous'}</div>
+                    </div>
 
-                container.appendChild(row);
+                    <p class="gold-message">Your brilliant deduction skills and positive attitude truly deserve this recognition.</p>
+                    
+                    <div class="gold-score-pill">
+                        Score: ${p1.score || 0} pts
+                    </div>
+                </div>
+            `;
+
+            // Render Rest of List
+            listContainer.innerHTML = "";
+            sorted.forEach((p, index) => {
+                const rankNum = index + 1;
+                const role = getInteractionLevel(p, getSelfieCount(p.id));
+                const timeStr = formatTime(p.avgCorrectSec);
+                
+                let starsClass = rankNum <= 3 ? "gold" : "";
+                
+                const row = document.createElement("div");
+                row.className = "list-row";
+                row.style.animationDelay = `${index * 0.15}s`;
+                
+                row.innerHTML = `
+                    <div class="list-rank">${getOrdinal(rankNum)}</div>
+                    <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="list-avatar" />
+                    <div class="list-info">
+                        <h3 class="list-name">${p.name || 'Anonymous'}</h3>
+                        <p class="list-role">${role}</p>
+                    </div>
+                    <div class="list-stats">
+                        <div class="list-stars ${starsClass}">★ ★ ★</div>
+                        <div class="list-time">${timeStr}</div>
+                    </div>
+                    <div class="list-score-box">
+                        <div class="list-score-label">Score</div>
+                        <div class="list-score">${p.score || 0}</div>
+                    </div>
+                `;
+                listContainer.appendChild(row);
             });
         }
 
-        // Helper to render completion tag inside lobby
-        function getPlayerLobbyStatus(p) {
-            const hasAnswers = p.answers && Object.keys(p.answers).length >= 7;
-            if (hasAnswers || p.lobbyQuestionIndex === 10) {
-                return { text: "SUBMITTED", color: "#10b981", bg: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.3)" };
-            }
-            if (p.lobbyQuestionIndex !== undefined && p.lobbyQuestionIndex >= 0) {
-                return { text: `Q${p.lobbyQuestionIndex + 1}`, color: "#22d3ee", bg: "rgba(34, 211, 238, 0.15)", border: "1px solid rgba(34, 211, 238, 0.3)" };
-            }
-            const hasPhoto = p.photoUrl && p.photoUrl !== "/assets/detective_sketch.png";
-            if (hasPhoto) {
-                return { text: "ONBOARDING", color: "#fbbf24", bg: "rgba(251, 191, 36, 0.15)", border: "1px solid rgba(251, 191, 36, 0.3)" };
-            }
-            return { text: "JOINED", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)", border: "1px solid rgba(148, 163, 184, 0.3)" };
-        }
-
-
-        // 3. Render Right Column (Live chronological selfie feed)
         function renderSelfieStream() {
             const container = document.getElementById("selfiesStream");
             const countEl = document.getElementById("selfiesCountText");
 
             if (!appState || !appState.selfies || appState.selfies.length === 0) {
-                container.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.3; color:white;">No selfies captured in this session yet. 📸</div>`;
+                container.innerHTML = `<div style="padding:40px; text-align:center; color: var(--text-gray); font-weight: 600;">No selfies captured in this session yet. 📸</div>`;
                 countEl.innerText = "0 Snaps";
                 return;
             }
 
-            // Show newest snaps at the top (reverse chronological order)
             let selfies = [...appState.selfies].reverse();
-            if (selectedPlayerId) {
-                selfies = selfies.filter(s => s.playerId === selectedPlayerId);
-            }
-            
-            if (selfies.length === 0) {
-                container.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.3; color:white; grid-column: 1 / -1;">No selfies match the current filter. 📸</div>`;
-                countEl.innerText = "0 Snaps";
-                return;
-            }
-
             countEl.innerText = `${selfies.length} Snaps`;
             container.innerHTML = "";
 
-            selfies.forEach(s => {
+            selfies.forEach((s, index) => {
                 const card = document.createElement("div");
                 card.className = "stream-card";
+                card.style.animationDelay = `${index * 0.08}s`;
                 
-                // Color code the card borders based on correctness
-                card.style.borderColor = s.isCorrect ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)";
+                card.style.borderColor = s.isCorrect ? "rgba(16, 185, 129, 0.4)" : "rgba(239, 68, 68, 0.4)";
 
                 const correctBadge = s.isCorrect 
                     ? `<span class="stream-badge badge-correct">Correct Match</span>`
                     : `<span class="stream-badge badge-wrong">Wrong Match</span>`;
-
-                const pointsBadge = s.status === "approved"
-                    ? `<span class="stream-badge badge-pts">✨ +${s.creativityPoints} pts</span>`
-                    : `<span class="stream-badge" style="background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.5);">⏳ Reviewing</span>`;
+                    
+                const username = s.playerName.replace(/\s+/g, '').toLowerCase();
+                const avatar = s.photoUrl || '/assets/detective_sketch.png';
+                const likes = s.status === "approved" ? s.creativityPoints : "0";
 
                 card.innerHTML = `
+                    <div class="ig-header">
+                        <div class="ig-avatar-ring">
+                            <img src="${avatar}" class="ig-avatar" />
+                        </div>
+                        <span class="ig-username">${username}</span>
+                        <svg class="ig-menu" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
                     <div class="stream-img-container">
-                        <img src="${s.photoUrl}" alt="Selfie Snapshot" / loading="lazy">
+                        <img src="${s.photoUrl}" alt="Selfie Snapshot" loading="lazy" />
                         <div class="stream-badges">
                             ${correctBadge}
-                            ${pointsBadge}
                         </div>
                     </div>
-                    <div class="stream-info">
-                        <div class="stream-players">
-                            <span>${s.playerName}</span> guessed <strong>${s.guessedName}</strong>
+                    <div class="ig-actions">
+                        <div class="ig-action-left">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ef4444" stroke-width="2" fill="${s.status === 'approved' ? '#ef4444' : 'none'}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </div>
-                        <div class="stream-time">
-                            Target was: <strong>${s.targetName}</strong> | Response: ${s.elapsed !== undefined ? s.elapsed : '?'}s
+                        <svg class="ig-bookmark" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <div class="ig-caption-area">
+                        <div class="ig-likes">${likes} likes</div>
+                        <div class="ig-caption">
+                            <strong>${username}</strong> guessed ${s.guessedName}
                         </div>
+                        <div class="ig-comments-link">View all 1 comments</div>
+                        <div class="ig-caption" style="margin-bottom:8px;">
+                            <strong>gamemaster</strong> Target was ${s.targetName}
+                        </div>
+                        <div class="ig-timestamp">Response: ${s.elapsed !== undefined ? s.elapsed : '?'}s</div>
                     </div>
                 `;
 
@@ -851,7 +785,5 @@
             });
         }
     </script>
-    <script src="/global_navbar.js"></script>
-
 </body>
 </html>

@@ -399,6 +399,12 @@ function showWinnerModal(podiumInfo) {
   const modalScore = document.getElementById("winnerModalScore");
   if (modalScore) modalScore.innerText = player.score;
 
+  const modalSelfies = document.getElementById("winnerModalSelfies");
+  if (modalSelfies) modalSelfies.innerText = player.selfiesCount || 0;
+
+  const modalSolved = document.getElementById("winnerModalSolved");
+  if (modalSolved) modalSolved.innerText = player.correct || 0;
+
   const modalRank = document.getElementById("winnerModalRank");
   if (modalRank) modalRank.innerText = "#" + podiumInfo.lastRank;
 
@@ -568,16 +574,11 @@ function updateUI(s) {
 }
 
 function triggerCinematicFinale(leaderboard) {
-  if (!orbitControls) return;
-  orbitControls.enabled = false;
 
   const top1 = leaderboard.slice(0, 1);
   const sequence = gsap.timeline({
     onComplete: () => {
-      orbitControls.enabled = true;
-      orbitControls.target.set(0, 4, -10);
-
-      // Trigger Winner Modal after camera pans
+        // Trigger Winner Modal after camera pans
       setTimeout(() => {
         const winner = leaderboard[0];
         if (!winner) return;
@@ -586,6 +587,13 @@ function triggerCinematicFinale(leaderboard) {
         if (modalName) modalName.innerText = "CHAMPION: " + winner.name;
         const modalScore = document.getElementById("winnerModalScore");
         if (modalScore) modalScore.innerText = winner.score;
+        
+        const modalSelfies = document.getElementById("winnerModalSelfies");
+        if (modalSelfies) modalSelfies.innerText = winner.selfiesCount || 0;
+        
+        const modalSolved = document.getElementById("winnerModalSolved");
+        if (modalSolved) modalSolved.innerText = winner.correct || 0;
+        
         const modalRank = document.getElementById("winnerModalRank");
         if (modalRank) modalRank.innerText = "#1";
         const modalImg = document.getElementById("winnerModalImg");
@@ -611,8 +619,8 @@ function triggerCinematicFinale(leaderboard) {
     const podInfo = podiums.find(p => p.playerId === top1[rankIndex].id);
     if (!podInfo) return;
 
-    const targetPos = new THREE.Vector3();
-    podInfo.bust.getWorldPosition(targetPos);
+    const rankPos = getRankPos(rankIndex + 1);
+    const targetPos = new THREE.Vector3(rankPos.x, rankPos.y + 2.5, rankPos.z);
 
     sequence.to(engine.camera.position, {
       x: targetPos.x,

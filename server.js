@@ -248,7 +248,10 @@ async function getLeaderboard() {
         } catch (e) {}
     }
 
+    const selfies = await getSelfies();
+
     const arr = all.map(p => {
+        const playerSelfies = selfies.filter(s => s.playerId === p.id).length;
         return {
             id: p.id,
             name: p.name,
@@ -257,6 +260,7 @@ async function getLeaderboard() {
             answers: p.answers || null,
             correct: p.correct || 0,
             wrong: p.wrong || 0,
+            selfiesCount: playerSelfies,
             lobbyQuestionIndex: p.lobbyQuestionIndex !== undefined ? p.lobbyQuestionIndex : -1,
             accuracy: (p.correct + p.wrong)
                 ? Math.round((p.correct / (p.correct + p.wrong)) * 100)

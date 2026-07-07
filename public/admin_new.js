@@ -222,23 +222,23 @@ function renderEventLog(selfies) {
         if (s.isCorrect) {
             item.innerHTML = `
                 <div>
-                    <span style="color: #2563eb; font-weight: 700;">${s.playerName}</span> 
-                    <span style="color: #475569;">matched</span> 
-                    <span style="color: #0f172a; font-weight: 700;">${s.targetName}</span>
+                    <span style="color: var(--neon-cyan); font-weight: 700;">${s.playerName}</span> 
+                    matched 
+                    <span style="color: #fff; font-weight: 700;">${s.targetName}</span>
                 </div>
-                <div style="font-size: 0.75rem; color: #64748b; display: flex; gap: 8px; align-items: center;">
+                <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); display: flex; gap: 8px; align-items: center;">
                     <span>${timeText}</span>
-                    <span style="color: #10b981;">✅</span>
+                    <span style="color: var(--neon-cyan);">✅</span>
                 </div>
             `;
         } else {
             item.innerHTML = `
                 <div>
                     <span style="color: #ef4444; font-weight: 700;">${s.playerName}</span> 
-                    <span style="color: #475569;">guessed</span> 
-                    <span style="color: #0f172a; font-weight: 700;">${s.guessedName}</span>
+                    guessed 
+                    <span style="color: rgba(255,255,255,0.6);">${s.guessedName}</span>
                 </div>
-                <div style="font-size: 0.75rem; color: #64748b; display: flex; gap: 8px; align-items: center;">
+                <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); display: flex; gap: 8px; align-items: center;">
                     <span>${timeText}</span>
                     <span style="color: #ef4444;">❌</span>
                 </div>
@@ -698,15 +698,7 @@ window.showPlayerProfile = function(playerId) {
             morningFuel: "Morning Fuel",
             workspaceQuirk: "Workspace Quirk",
             weekendRoutine: "Weekend Routine",
-            surprisingSkill: "Surprising Skill",
-            // Legacy fallbacks
-            superpower: "Superpower",
-            food: "Food",
-            travel: "Travel",
-            birdtype: "Bird Type",
-            funfact: "Fun Fact",
-            themesong: "Theme Song",
-            "surprising skill": "Surprising Skill"
+            surprisingSkill: "Surprising Skill"
         };
         Object.keys(p.answers).forEach(key => {
             const label = labelsMap[key] || key;
@@ -848,15 +840,8 @@ window.renderDossierDetail = function(playerId) {
     if (!p) {
         container.innerHTML = `
             <div class="dossier-placeholder">
-                <div class="radar-container">
-                    <div class="radar-grid"></div>
-                    <div class="radar-sweep"></div>
-                    <div class="radar-dot" style="top: 35%; left: 45%; animation-delay: 0.3s;"></div>
-                    <div class="radar-dot" style="top: 65%; left: 75%; animation-delay: 1.2s;"></div>
-                    <div class="radar-dot" style="top: 20%; left: 70%; animation-delay: 1.8s;"></div>
-                </div>
-                <h4 style="color:#0ea5e9; letter-spacing:2px; margin:0; text-transform:uppercase; font-size:0.9rem;">Awaiting Agent Selection</h4>
-                <p style="text-align:center; color:#64748b; font-size:0.85rem; max-width:85%; line-height:1.5;">Accessing field database... Select an active investigator on the roster to securely decrypt their target dossier and intercept selfie transmissions.</p>
+                <span>🕵️</span>
+                <p>Select an investigator row on the left to pull up their target dossier file & captured match selfies.</p>
             </div>
         `;
         return;
@@ -877,15 +862,7 @@ window.renderDossierDetail = function(playerId) {
             morningFuel: "Morning Fuel",
             workspaceQuirk: "Workspace Quirk",
             weekendRoutine: "Weekend Routine",
-            surprisingSkill: "Surprising Skill",
-            // Legacy fallbacks
-            superpower: "Superpower",
-            food: "Food",
-            travel: "Travel",
-            birdtype: "Bird Type",
-            funfact: "Fun Fact",
-            themesong: "Theme Song",
-            "surprising skill": "Surprising Skill"
+            surprisingSkill: "Surprising Skill"
         };
         Object.keys(p.answers).forEach(key => {
             const label = labelsMap[key] || key;
@@ -919,12 +896,12 @@ window.renderDossierDetail = function(playerId) {
     const accuracyText = p.accuracy !== undefined ? `${p.accuracy}% acc` : "--% acc";
 
     container.innerHTML = `
-        <div class="dossier-anim dossier-id-card">
+        <div class="dossier-anim">
         <!-- Dossier Header -->
         <div class="dossier-profile">
-            <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="dossier-avatar" style="flex-shrink:0;" />
-            <div style="flex-grow:1; overflow:hidden;">
-                <h2 class="dossier-name" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${p.name || 'Anonymous Investigator'}</h2>
+            <img src="${p.photoUrl || '/assets/detective_sketch.png'}" class="dossier-avatar" />
+            <div>
+                <h2 class="dossier-name">${p.name || 'Anonymous Investigator'}</h2>
                 <span class="dossier-level" style="color:${level.color}; background:${level.bg}; border:${level.border};">
                     ${level.text}
                 </span>
@@ -932,35 +909,33 @@ window.renderDossierDetail = function(playerId) {
         </div>
 
         <!-- Dossier Metrics -->
-        <div class="dossier-metrics" style="position:relative; z-index:2; margin-bottom: 25px;">
+        <div class="dossier-metrics">
             <div class="dossier-metric-box">
                 <h6>Score</h6>
-                <span class="dossier-metric-val" style="color:#2563eb;">${p.score || 0} pts</span>
+                <span class="dossier-metric-val" style="color:var(--neon-blue);">${p.score || 0} pts</span>
             </div>
             <div class="dossier-metric-box">
                 <h6>Accuracy/Speed</h6>
-                <span class="dossier-metric-val" style="color:#0ea5e9; font-size: 0.85rem; line-height: 1.3; display:block; margin-top:3px;">
+                <span class="dossier-metric-val" style="color:var(--gold-bright); font-size: 0.8rem; line-height: 1.2; display:block; margin-top:3px;">
                     ${speedText}<br/>${accuracyText}
                 </span>
             </div>
             <div class="dossier-metric-box">
                 <h6>Wrong Guesses</h6>
-                <span class="dossier-metric-val" style="color:#ef4444;">${p.wrong || 0} <small style="font-size:0.7rem; display:block; margin-top:2px;">(${(p.wrong || 0) * -30} pts)</small></span>
+                <span class="dossier-metric-val" style="color:#ef4444;">${p.wrong || 0} <small style="font-size:0.6rem; display:block; margin-top:2px;">(${(p.wrong || 0) * -30} pts)</small></span>
             </div>
         </div>
 
         <!-- Clues Grid -->
-        <div style="position:relative; z-index:2;">
-            <h4 style="font-size: 0.8rem; text-transform:uppercase; color:#3b82f6; letter-spacing:1px; margin: 15px 0 10px 0; border-bottom: 2px dashed #e2e8f0; padding-bottom:8px;">🔍 Dossier File Clues</h4>
-            <div class="dossier-clues">
-                ${cluesHtml}
-            </div>
+        <h4 style="font-size: 0.75rem; text-transform:uppercase; color:var(--gold-bright); letter-spacing:1px; margin: 15px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:5px;">🔍 Dossier File Clues</h4>
+        <div class="dossier-clues">
+            ${cluesHtml}
+        </div>
 
-            <!-- Captured Selfies Grid -->
-            <h4 style="font-size: 0.8rem; text-transform:uppercase; color:#3b82f6; letter-spacing:1px; margin: 25px 0 10px 0; border-bottom: 2px dashed #e2e8f0; padding-bottom:8px;">📸 Target Captured Selfies</h4>
-            <div class="dossier-selfies">
-                ${selfiesHtml}
-            </div>
+        <!-- Captured Selfies Grid -->
+        <h4 style="font-size: 0.75rem; text-transform:uppercase; color:var(--gold-bright); letter-spacing:1px; margin: 25px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:5px;">📸 Target Captured Selfies</h4>
+        <div class="dossier-selfies">
+            ${selfiesHtml}
         </div>
         </div>
     `;
@@ -996,47 +971,20 @@ window.renderSelfieStream = function() {
             ? `<span class="stream-badge badge-pts">✨ +${s.creativityPoints} pts</span>`
             : `<span class="stream-badge" style="background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.5);">⏳ Reviewing</span>`;
 
-        const username = s.playerName.replace(/\s+/g, '').toLowerCase();
-        const avatar = s.photoUrl || '/assets/detective_sketch.png';
-        const likes = s.status === "approved" ? s.creativityPoints : "0";
-
         card.innerHTML = `
-            <div class="ig-header">
-                <div class="ig-avatar-ring">
-                    <img src="${avatar}" class="ig-avatar" />
-                </div>
-                <span class="ig-username">${username}</span>
-                <svg class="ig-menu" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-            </div>
             <div class="stream-img-container">
-                <img src="${s.photoUrl}" alt="Selfie Snapshot" loading="lazy" />
+                <img src="${s.photoUrl}" alt="Selfie Snapshot" />
                 <div class="stream-badges">
                     ${correctBadge}
                     ${pointsBadge}
                 </div>
             </div>
-            <div class="ig-actions">
-                <div class="ig-action-left">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ef4444" stroke-width="2" fill="${s.status === 'approved' ? '#ef4444' : 'none'}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <div class="stream-info">
+                <div class="stream-players">
+                    <span>${s.playerName}</span> guessed <strong>${s.guessedName}</strong>
                 </div>
-                <svg class="ig-bookmark" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <div class="ig-caption-area">
-                <div class="ig-likes">${likes} likes</div>
-                <div class="ig-caption">
-                    <strong>${username}</strong> guessed ${s.guessedName}
-                </div>
-                <div class="ig-caption" style="margin-bottom:8px;">
-                    <strong>gamemaster</strong> Target was ${s.targetName}
-                </div>
-                <div class="ig-timestamp">Response: ${s.elapsed !== undefined ? s.elapsed : '?'}s</div>
-                
-                <div style="margin-top: 15px; border-top: 1px solid #efefef; padding-top: 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <input type="range" min="0" max="80" value="40" class="creativity-slider" style="flex:1; accent-color:#0ea5e9; height:4px; border-radius:2px;" oninput="this.nextElementSibling.innerText = this.value" />
-                    <span style="font-weight:800; color:#0ea5e9; min-width:30px; text-align:right; font-size:1.1rem;">40</span>
-                    <button class="btn-incomplete" style="width:auto; padding:8px 16px; margin:0; border-radius:8px; font-size:0.8rem; background:#38bdf8; color:white; border:none; cursor:pointer;" onclick="scoreSelfie('${s.id}', this.previousElementSibling.previousElementSibling.value, this)">Award</button>
+                <div class="stream-time">
+                    Target was: <strong>${s.targetName}</strong> | Response: ${s.elapsed !== undefined ? s.elapsed : '?'}s
                 </div>
             </div>
         `;

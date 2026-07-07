@@ -321,10 +321,10 @@
         /* GLASS CARDS */
         .glass-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
+            border: none;
             border-radius: 24px;
             padding: 24px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 4px 6px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
             position: relative;
             overflow: hidden;
         }
@@ -853,61 +853,6 @@
             text-align: center;
             color: #94a3b8;
             gap: 15px;
-            padding: 20px;
-        }
-
-        .radar-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 2px solid rgba(14, 165, 233, 0.2);
-            background: rgba(14, 165, 233, 0.03);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.05), inset 0 0 20px rgba(14, 165, 233, 0.05);
-            margin-bottom: 10px;
-        }
-        .radar-grid {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(14, 165, 233, 0.15) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(14, 165, 233, 0.15) 1px, transparent 1px);
-            background-size: 15px 15px;
-            background-position: center center;
-            border-radius: 50%;
-        }
-        .radar-sweep {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            top: 0;
-            left: 50%;
-            transform-origin: bottom left;
-            background: linear-gradient(45deg, rgba(14, 165, 233, 0.6) 0%, rgba(14, 165, 233, 0) 100%);
-            animation: radarSweep 2s infinite linear;
-            clip-path: polygon(0 100%, 100% 0, 100% 100%);
-        }
-        @keyframes radarSweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .radar-dot {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: #0ea5e9;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #0ea5e9;
-            animation: radarPing 2s infinite ease-out;
-        }
-        @keyframes radarPing {
-            0%, 100% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1.5); }
         }
 
         .dossier-placeholder span {
@@ -1096,69 +1041,11 @@
             }
         }
 
-        .dossier-id-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 25px;
-        }
-        .dossier-id-card::after {
-            content: 'CONFIDENTIAL';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: rgba(0,0,0,0.02);
-            pointer-events: none;
-            letter-spacing: 5px;
-        }
-
-        .ig-header {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-        }
-        
-        .ig-avatar-ring {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            padding: 2px;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        
-        .ig-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            object-fit: cover;
-            box-sizing: border-box;
-        }
-        
-        .ig-username {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #262626;
-            flex-grow: 1;
-        }
-
         .stream-img-container {
             width: 100%;
-            aspect-ratio: 1; /* Instagram square */
-            background: #fafafa;
+            height: 180px;
             position: relative;
-            overflow: hidden;
-            border-top: 1px solid #efefef;
-            border-bottom: 1px solid #efefef;
+            background: #000;
         }
 
         .stream-img-container img {
@@ -1189,63 +1076,40 @@
             background: rgba(0, 200, 83, 0.15);
             color: var(--success);
             border-color: rgba(16, 185, 129, 0.3);
-            backdrop-filter: blur(4px);
         }
 
         .badge-wrong {
             background: rgba(255, 23, 68, 0.15);
             color: var(--error);
             border-color: rgba(239, 68, 68, 0.3);
-            backdrop-filter: blur(4px);
         }
 
         .badge-pts {
             background: rgba(255, 234, 0, 0.15);
             color: var(--warning);
             border-color: rgba(251, 191, 36, 0.3);
-            backdrop-filter: blur(4px);
         }
 
-        .ig-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px 8px 15px;
-            color: #262626;
+        .stream-info {
+            padding: 12px 15px;
         }
-        
-        .ig-action-left {
-            display: flex;
-            gap: 16px;
-        }
-        
-        .ig-caption-area {
-            padding: 0 15px 12px 15px;
-            font-size: 0.9rem;
-            color: #262626;
-        }
-        
-        .ig-likes {
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        
-        .ig-caption {
-            margin-bottom: 4px;
-            line-height: 1.4;
-        }
-        
-        .ig-comments-link {
-            color: #737373;
+
+        .stream-players {
             font-size: 0.85rem;
+            font-weight: 750;
+            color: #ffffff;
             margin-bottom: 4px;
-            cursor: pointer;
         }
-        
-        .ig-timestamp {
-            color: #737373;
+
+        .stream-players span {
+            color: #0284c7;
+            font-weight: 900;
+        }
+
+        .stream-time {
             font-size: 0.7rem;
-            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
         }
 
         /* OVERLAYS & MODALS */
@@ -1706,15 +1570,9 @@
                             </div>
                             <div id="dossierContent" class="column-scroll" style="height: 100%;">
                                 <div class="dossier-placeholder">
-                                    <div class="radar-container">
-                                        <div class="radar-grid"></div>
-                                        <div class="radar-sweep"></div>
-                                        <div class="radar-dot" style="top: 35%; left: 45%; animation-delay: 0.3s;"></div>
-                                        <div class="radar-dot" style="top: 65%; left: 75%; animation-delay: 1.2s;"></div>
-                                        <div class="radar-dot" style="top: 20%; left: 70%; animation-delay: 1.8s;"></div>
-                                    </div>
-                                    <h4 style="color:#0ea5e9; letter-spacing:2px; margin:0; text-transform:uppercase; font-size:0.9rem;">Awaiting Agent Selection</h4>
-                                    <p style="text-align:center; color:#64748b; font-size:0.85rem; max-width:85%; line-height:1.5;">Accessing field database... Select an active investigator on the roster to securely decrypt their target dossier and intercept selfie transmissions.</p>
+                                    <span>🕵️</span>
+                                    <p>Select an investigator row on the left to pull up their target dossier file &
+                                        captured match selfies.</p>
                                 </div>
                             </div>
                         </div>
@@ -1826,10 +1684,10 @@
                                     <span style="font-size: 2.2rem; flex-shrink: 0;">🦉</span>
                                     <div>
                                         <h4
-                                            style="font-family:'Inter'; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:#818cf8; margin-bottom:6px;">
+                                            style="font-family:'Inter'; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:#4338ca; margin-bottom:6px;">
                                             Professor Owl's Insight</h4>
                                         <p id="owlInsightText"
-                                            style="font-size:0.85rem; color:#f8fafc; line-height:1.4;">
+                                            style="font-size:0.85rem; color:#475569; line-height:1.4;">
                                             Gathering intelligence on detective activity... Start the game to monitor
                                             response speed and matching trends!
                                         </p>

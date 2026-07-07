@@ -12,16 +12,13 @@ let localCards = [];
 let selectedSuspectId = null;
 
 const clueIcons = {
-    "Work style": "💼",
-    "Team role": "👥",
-    "Meeting superpower": "📝",
-    "Ideal break": "🚶",
-    "Updates via": "📱",
-    "Recharge": "🎮",
-    "Morning fuel": "☕",
-    "Workspace quirk": "🖥️",
-    "Weekend routine": "🌴",
-    "Surprising skill": "🃏"
+    "Superpower": "🦸‍♂️",
+    "Favorite food": "🍕",
+    "Travel bucket list": "✈️",
+    "Early bird / Night owl": "🦉",
+    "Fun fact": "🤫",
+    "Theme song": "🎵",
+    "Surprising skill": "✨"
 };
 
 // Connect to socket and update score pill
