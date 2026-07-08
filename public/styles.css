@@ -71,7 +71,7 @@ body::after {
     position: fixed;
     inset: 0;
     background:
-        url('/assets/4063.jpg') center bottom/cover no-repeat;
+        url('/assets/4063.jpg?v=2') center bottom/cover no-repeat;
     z-index: -2;
     filter: blur(0.5px) brightness(0.85);
     transform: scale(1.05);
