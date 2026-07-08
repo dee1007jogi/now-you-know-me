@@ -70,7 +70,7 @@ body::after {
     position: fixed;
     inset: 0;
     background:
-        url('/assets/2151575910.jpg') center bottom/cover no-repeat;
+        url('/uploads/4063.jpg') center bottom/cover no-repeat;
     z-index: -2;
     filter: blur(2px) brightness(0.65);
     transform: scale(1.05);
